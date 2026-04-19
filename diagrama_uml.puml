@@ -1,0 +1,182 @@
+@startuml SimuladorPortafolio
+
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing true
+skinparam class {
+    BackgroundColor<<entity>> LightBlue
+    BackgroundColor<<service>> LightGreen
+    BackgroundColor<<main>> LightYellow
+    BorderColor Black
+    ArrowColor Black
+}
+
+' ==================== CLASE PRINCIPAL ====================
+class Portafolio <<entity>> {
+    + capital: float
+    + acciones: dict
+    + cdts: list
+    + historial_transacciones: list
+    + historial_valor: list
+    + dividendos_recibidos: float
+    + comisiones_pagadas: float
+
+    + __init__(capital_inicial: float)
+    + to_dict(): dict
+    + {static} from_dict(datos: dict): Portafolio
+}
+
+' ==================== CONSTANTES ====================
+class Constantes << (C, LightGray) >> {
+    + {static} COMISION_BROKER: float = 0.001
+    + {static} IMPUESTO_DIVIDENDO: float = 0.10
+    + {static} ARCHIVO_DATOS: str = "portafolio_datos.json"
+    + {static} ACCIONES_DISPONIBLES: dict
+}
+
+' ==================== SERVICIOS DE MERCADO ====================
+class MarketDataService <<service>> {
+    + {static} obtener_precio_accion(ticker: str): dict
+    + {static} obtener_historial_precios(ticker: str, dias: int): Series
+    + {static} obtener_dividendos(ticker: str, dias: int): float
+}
+
+' ==================== SERVICIOS DE TRANSACCIONES ====================
+class TransaccionService <<service>> {
+    + {static} comprar_accion(portafolio: Portafolio, ticker: str, cantidad: int): bool
+    + {static} vender_accion(portafolio: Portafolio, ticker: str, cantidad: int): bool
+}
+
+' ==================== SERVICIOS DE RENTA FIJA ====================
+class RentaFijaService <<service>> {
+    + {static} agregar_cdt(portafolio: Portafolio, monto: float, tasa_anual: float, dias_plazo: int): bool
+    + {static} liquidar_intereses_cdts(portafolio: Portafolio): void
+    + {static} cobrar_dividendos(portafolio: Portafolio): void
+}
+
+' ==================== SERVICIOS DE REPORTES ====================
+class ReporteService <<service>> {
+    + {static} calcular_valor_portafolio(portafolio: Portafolio): dict
+    + {static} mostrar_resumen(portafolio: Portafolio, capital_inicial: float): dict
+}
+
+' ==================== SERVICIOS DE VISUALIZACION ====================
+class GraficoService <<service>> {
+    + {static} graficar_evolucion_portafolio(portafolio: Portafolio): void
+    + {static} graficar_composicion_portafolio(portafolio: Portafolio): void
+    + {static} graficar_precios_acciones(portafolio: Portafolio, dias: int): void
+    + {static} graficar_rentabilidad_acciones(portafolio: Portafolio): void
+}
+
+' ==================== SERVICIOS DE PERSISTENCIA ====================
+class PersistenciaService <<service>> {
+    + {static} guardar_portafolio(portafolio: Portafolio, capital_inicial: float): void
+    + {static} cargar_portafolio(): tuple
+}
+
+' ==================== CLASE PRINCIPAL ====================
+class Main <<main>> {
+    + {static} mostrar_menu(): void
+    + {static} main(): void
+}
+
+' ==================== ESTRUCTURAS DE DATOS INTERNAS ====================
+class EstructuraAccion << (D, LightCoral) >> {
+    cantidad: int
+    precio_promedio: float
+}
+
+class EstructuraCDT << (D, LightCoral) >> {
+    id: int
+    monto_inicial: float
+    tasa_anual: float
+    dias_plazo: int
+    fecha_inicio: str
+    fecha_vencimiento: str
+    interes_diario: float
+    intereses_acumulados: float
+    dias_transcurridos: int
+    activo: bool
+}
+
+class EstructuraTransaccion << (D, LightCoral) >> {
+    tipo: str
+    ticker: str
+    cantidad: int
+    precio: float
+    comision: float
+    total: float
+    fecha: str
+    capital_restante: float
+    ganancia: float (solo ventas)
+}
+
+' ==================== RELACIONES ====================
+Portafolio --> "1" EstructuraAccion : contiene >
+Portafolio --> "*" EstructuraCDT : contiene >
+Portafolio --> "*" EstructuraTransaccion : registra >
+
+TransaccionService ..> Portafolio : opera sobre >
+TransaccionService ..> MarketDataService : utiliza >
+
+RentaFijaService ..> Portafolio : opera sobre >
+RentaFijaService ..> MarketDataService : utiliza >
+
+ReporteService ..> Portafolio : consulta >
+ReporteService ..> MarketDataService : utiliza >
+
+GraficoService ..> Portafolio : visualiza >
+GraficoService ..> ReporteService : utiliza >
+GraficoService ..> MarketDataService : utiliza >
+
+PersistenciaService ..> Portafolio : guarda/carga >
+
+Main ..> Portafolio : crea/usa >
+Main ..> TransaccionService : usa >
+Main ..> RentaFijaService : usa >
+Main ..> ReporteService : usa >
+Main ..> GraficoService : usa >
+Main ..> PersistenciaService : usa >
+Main ..> Constantes : accede >
+
+note right of Portafolio
+    **Clase Principal (Modelo)**
+    Contiene toda la información
+    del portafolio de inversión.
+    Usa diccionario para acciones
+    (búsqueda O(1)) y listas para
+    históricos (inserción O(1))
+end note
+
+note right of MarketDataService
+    **Integración Externa**
+    Conecta con Yahoo Finance API
+    via yfinance para obtener
+    precios reales del mercado.
+end note
+
+note bottom of TransaccionService
+    **Reglas de Negocio**
+    - Valida rango de precios
+    - Calcula comisiones 0.1%
+    - Precio promedio ponderado
+    - Registra en historial
+end note
+
+note bottom of RentaFijaService
+    **Simulación CDT**
+    Interés simple diario:
+    monto × (tasa_anual / 365)
+end note
+
+note right of GraficoService
+    **Visualización**
+    Usa matplotlib para generar
+    4 tipos de gráficas:
+    - Línea (evolución)
+    - Pie (composición)
+    - Múltiples líneas (precios)
+    - Barras (rentabilidad)
+end note
+
+@enduml
