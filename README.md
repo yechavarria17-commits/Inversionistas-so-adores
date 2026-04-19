@@ -1,5 +1,7 @@
 # 📈 Simulador de Portafolio de Inversión v1.0
 
+![Arquitectura del Sistema](diagrama_portafolio.png)
+
 ### **Universidad — Materia: Estructura de Datos / Finanzas Computacionales**
 
 Este es un simulador avanzado de gestión de portafolios de inversión desarrollado en Python. Permite a los usuarios gestionar activos de renta variable (Acciones) y renta fija (CDTs), utilizando datos reales del mercado financiero a través de la API de Yahoo Finance.
