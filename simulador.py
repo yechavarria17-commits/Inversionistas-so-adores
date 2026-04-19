@@ -12,6 +12,16 @@ Cómo funciona en resumen:
 5. Se grafican resultados históricos
 """
 
+import sys
+import io
+
+# Configurar la salida estándar para usar UTF-8 y evitar errores de codificación en Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except:
+        pass
+
 import yfinance as yf           # Para obtener precios de acciones
 import pandas as pd             # Para manejar tablas de datos
 import matplotlib.pyplot as plt # Para hacer gráficas
@@ -107,7 +117,7 @@ def obtener_precio_accion(ticker: str):
         historial = accion.history(period="5d")
 
         if historial.empty:
-            print(f"  ⚠ No se encontraron datos para {ticker}")
+            print(f"  [!] No se encontraron datos para {ticker}")
             return None
 
         # Tomamos la última fila (día más reciente)
@@ -119,7 +129,7 @@ def obtener_precio_accion(ticker: str):
             "fecha":   str(historial.index[-1].date())
         }
     except Exception as e:
-        print(f"  ⚠ Error obteniendo precio de {ticker}: {e}")
+        print(f"  [!] Error obteniendo precio de {ticker}: {e}")
         return None
 
 
@@ -133,7 +143,7 @@ def obtener_historial_precios(ticker: str, dias: int = 30):
         historial = accion.history(period=f"{dias}d")
         return historial["Close"]
     except Exception as e:
-        print(f"  ⚠ Error en historial de {ticker}: {e}")
+        print(f"  [!] Error en historial de {ticker}: {e}")
         return None
 
 
@@ -174,7 +184,7 @@ def comprar_accion(portafolio: Portafolio, ticker: str, cantidad: int):
     datos = obtener_precio_accion(ticker)
 
     if datos is None:
-        print(f"  ✗ No se pudo obtener precio de {ticker}. Operación cancelada.")
+        print(f"  [X] No se pudo obtener precio de {ticker}. Operación cancelada.")
         return False
 
     precio_cierre = datos["cierre"]
@@ -186,7 +196,7 @@ def comprar_accion(portafolio: Portafolio, ticker: str, cantidad: int):
     # Validación: usamos el precio de cierre que debe estar dentro del rango
     # (esto siempre es verdad con datos reales, pero lo validamos como medida de seguridad)
     if not (precio_min <= precio_cierre <= precio_max):
-        print(f"  ✗ El precio de cierre ${precio_cierre} está fuera del rango del día.")
+        print(f"  [X] El precio de cierre ${precio_cierre} está fuera del rango del día.")
         return False
 
     # Cálculo de costos
@@ -198,7 +208,7 @@ def comprar_accion(portafolio: Portafolio, ticker: str, cantidad: int):
 
     # Verificar si hay suficiente capital
     if portafolio.capital < costo_total:
-        print(f"  ✗ Capital insuficiente. Disponible: ${portafolio.capital:.2f}, Necesario: ${costo_total:.2f}")
+        print(f"  [X] Capital insuficiente. Disponible: ${portafolio.capital:.2f}, Necesario: ${costo_total:.2f}")
         return False
 
     # Ejecutar la compra: descontar capital
@@ -232,7 +242,7 @@ def comprar_accion(portafolio: Portafolio, ticker: str, cantidad: int):
         "capital_restante": round(portafolio.capital, 2)
     })
 
-    print(f"  ✓ Compra exitosa: {cantidad} acciones de {ticker} a ${precio_cierre}")
+    print(f"  [OK] Compra exitosa: {cantidad} acciones de {ticker} a ${precio_cierre}")
     print(f"  Capital restante: ${portafolio.capital:.2f}")
     return True
 
@@ -249,19 +259,19 @@ def vender_accion(portafolio: Portafolio, ticker: str, cantidad: int):
     """
     # Verificar que tengamos las acciones
     if ticker not in portafolio.acciones:
-        print(f"  ✗ No tienes acciones de {ticker} en el portafolio.")
+        print(f"  [X] No tienes acciones de {ticker} en el portafolio.")
         return False
 
     pos = portafolio.acciones[ticker]
     if pos["cantidad"] < cantidad:
-        print(f"  ✗ Solo tienes {pos['cantidad']} acciones de {ticker}, no puedes vender {cantidad}.")
+        print(f"  [X] Solo tienes {pos['cantidad']} acciones de {ticker}, no puedes vender {cantidad}.")
         return False
 
     print(f"\n  Consultando precio de {ticker}...")
     datos = obtener_precio_accion(ticker)
 
     if datos is None:
-        print(f"  ✗ No se pudo obtener precio de {ticker}. Operación cancelada.")
+        print(f"  [X] No se pudo obtener precio de {ticker}. Operación cancelada.")
         return False
 
     precio_cierre = datos["cierre"]
@@ -272,7 +282,7 @@ def vender_accion(portafolio: Portafolio, ticker: str, cantidad: int):
 
     # Validación de coherencia del precio
     if not (precio_min <= precio_cierre <= precio_max):
-        print(f"  ✗ Precio de cierre fuera del rango del día.")
+        print(f"  [X] Precio de cierre fuera del rango del día.")
         return False
 
     # Cálculo
@@ -284,7 +294,7 @@ def vender_accion(portafolio: Portafolio, ticker: str, cantidad: int):
     ganancia = round((precio_cierre - pos["precio_promedio"]) * cantidad - comision, 4)
 
     print(f"  Ingreso bruto: ${ingreso_bruto:.2f} | Comisión: ${comision:.4f} | Ingreso neto: ${ingreso_neto:.2f}")
-    print(f"  {'✓ Ganancia' if ganancia >= 0 else '✗ Pérdida'}: ${ganancia:.2f}")
+    print(f"  {'[OK] Ganancia' if ganancia >= 0 else '[X] Pérdida'}: ${ganancia:.2f}")
 
     # Actualizar portafolio
     portafolio.capital += ingreso_neto
@@ -309,7 +319,7 @@ def vender_accion(portafolio: Portafolio, ticker: str, cantidad: int):
         "capital_restante": round(portafolio.capital, 2)
     })
 
-    print(f"  ✓ Venta exitosa: {cantidad} acciones de {ticker} a ${precio_cierre}")
+    print(f"  [OK] Venta exitosa: {cantidad} acciones de {ticker} a ${precio_cierre}")
     print(f"  Capital disponible: ${portafolio.capital:.2f}")
     return True
 
@@ -330,7 +340,7 @@ def agregar_cdt(portafolio: Portafolio, monto: float, tasa_anual: float, dias_pl
     dias_plazo:  número de días que dura el CDT
     """
     if portafolio.capital < monto:
-        print(f"  ✗ Capital insuficiente. Disponible: ${portafolio.capital:.2f}")
+        print(f"  [X] Capital insuficiente. Disponible: ${portafolio.capital:.2f}")
         return False
 
     # Descontar el monto del capital disponible
@@ -354,7 +364,7 @@ def agregar_cdt(portafolio: Portafolio, monto: float, tasa_anual: float, dias_pl
     }
 
     portafolio.cdts.append(cdt)
-    print(f"  ✓ CDT #{cdt['id']} creado: ${monto:.2f} al {tasa_anual*100:.1f}% anual por {dias_plazo} días")
+    print(f"  [OK] CDT #{cdt['id']} creado: ${monto:.2f} al {tasa_anual*100:.1f}% anual por {dias_plazo} días")
     print(f"  Interés diario: ${interes_diario:.4f} | Vencimiento: {fecha_vencimiento}")
     return True
 
@@ -379,7 +389,7 @@ def liquidar_intereses_cdts(portafolio: Portafolio):
             cdt["activo"] = False
             devolucion = cdt["monto_inicial"] + cdt["intereses_acumulados"]
             portafolio.capital += devolucion
-            print(f"  ✓ CDT #{cdt['id']} VENCIDO. Devuelto: ${devolucion:.2f} "
+            print(f"  [OK] CDT #{cdt['id']} VENCIDO. Devuelto: ${devolucion:.2f} "
                   f"(capital + ${cdt['intereses_acumulados']:.2f} en intereses)")
 
     if total_intereses > 0:
@@ -479,11 +489,11 @@ def mostrar_resumen(portafolio: Portafolio, capital_inicial: float):
     print(f"  Capital en caja:      ${valoracion['capital_caja']:>12,.2f}")
     print(f"  Valor en acciones:    ${valoracion['valor_acciones']:>12,.2f}")
     print(f"  Valor en CDTs:        ${valoracion['valor_cdts']:>12,.2f}")
-    print(f"{'─'*40}")
+    print(f"{'-'*40}")
     print(f"  VALOR TOTAL:          ${valoracion['valor_total']:>12,.2f}")
     print(f"  Capital inicial:      ${capital_inicial:>12,.2f}")
     print(f"  Rentabilidad neta:    ${rentabilidad:>+12,.2f}  ({pct:+.2f}%)")
-    print(f"{'─'*40}")
+    print(f"{'-'*40}")
     print(f"  Dividendos cobrados:  ${portafolio.dividendos_recibidos:>12,.4f}")
     print(f"  Comisiones pagadas:   ${portafolio.comisiones_pagadas:>12,.4f}")
 
@@ -492,7 +502,7 @@ def mostrar_resumen(portafolio: Portafolio, capital_inicial: float):
         print(f"  {'Ticker':<8} {'Cant':>5} {'P.Compra':>10} {'P.Actual':>10} {'Valor':>12} {'G/P':>10}")
         print(f"  {'─'*8} {'─'*5} {'─'*10} {'─'*10} {'─'*12} {'─'*10}")
         for d in valoracion["detalle_acciones"]:
-            signo = "▲" if d["ganancia_perdida"] >= 0 else "▼"
+            signo = "[+]" if d["ganancia_perdida"] >= 0 else "[-]"
             print(f"  {d['ticker']:<8} {d['cantidad']:>5} "
                   f"${d['precio_promedio']:>9.2f} "
                   f"${d['precio_actual']:>9.2f} "
@@ -529,7 +539,7 @@ def graficar_evolucion_portafolio(portafolio: Portafolio):
     Usa el historial_valor que se guarda cada vez que se hace un resumen.
     """
     if len(portafolio.historial_valor) < 2:
-        print("  ⚠ Se necesitan al menos 2 registros para graficar la evolución.")
+        print("  [!] Se necesitan al menos 2 registros para graficar la evolución.")
         print("    Haz más operaciones y consulta el resumen varias veces.")
         return
 
@@ -550,7 +560,7 @@ def graficar_evolucion_portafolio(portafolio: Portafolio):
     plt.tight_layout()
     plt.savefig("evolucion_portafolio.png", dpi=120)
     plt.show()
-    print("  ✓ Gráfica guardada: evolucion_portafolio.png")
+    print("  [OK] Gráfica guardada: evolucion_portafolio.png")
 
 
 def graficar_composicion_portafolio(portafolio: Portafolio):
@@ -576,7 +586,7 @@ def graficar_composicion_portafolio(portafolio: Portafolio):
         valores.append(valoracion["valor_cdts"])
 
     if not valores:
-        print("  ⚠ El portafolio está vacío.")
+        print("  [!] El portafolio está vacío.")
         return
 
     colores = plt.cm.Set3.colors[:len(etiquetas)]
@@ -593,7 +603,7 @@ def graficar_composicion_portafolio(portafolio: Portafolio):
     plt.tight_layout()
     plt.savefig("composicion_portafolio.png", dpi=120)
     plt.show()
-    print("  ✓ Gráfica guardada: composicion_portafolio.png")
+    print("  [OK] Gráfica guardada: composicion_portafolio.png")
 
 
 def graficar_precios_acciones(portafolio: Portafolio, dias: int = 30):
@@ -602,7 +612,7 @@ def graficar_precios_acciones(portafolio: Portafolio, dias: int = 30):
     Muestra la evolución de cada acción en los últimos 'dias' días.
     """
     if not portafolio.acciones:
-        print("  ⚠ No tienes acciones en el portafolio.")
+        print("  [!] No tienes acciones en el portafolio.")
         return
 
     tickers = list(portafolio.acciones.keys())
@@ -635,7 +645,7 @@ def graficar_precios_acciones(portafolio: Portafolio, dias: int = 30):
     plt.tight_layout()
     plt.savefig("historial_precios.png", dpi=120, bbox_inches='tight')
     plt.show()
-    print("  ✓ Gráfica guardada: historial_precios.png")
+    print("  [OK] Gráfica guardada: historial_precios.png")
 
 
 def graficar_rentabilidad_acciones(portafolio: Portafolio):
@@ -647,7 +657,7 @@ def graficar_rentabilidad_acciones(portafolio: Portafolio):
     detalle    = valoracion["detalle_acciones"]
 
     if not detalle:
-        print("  ⚠ No hay acciones para graficar.")
+        print("  [!] No hay acciones para graficar.")
         return
 
     tickers   = [d["ticker"] for d in detalle]
@@ -671,7 +681,7 @@ def graficar_rentabilidad_acciones(portafolio: Portafolio):
     plt.tight_layout()
     plt.savefig("rentabilidad_acciones.png", dpi=120)
     plt.show()
-    print("  ✓ Gráfica guardada: rentabilidad_acciones.png")
+    print("  [OK] Gráfica guardada: rentabilidad_acciones.png")
 
 
 # ============================================================
@@ -684,7 +694,7 @@ def guardar_portafolio(portafolio: Portafolio, capital_inicial: float):
     datos["capital_inicial"] = capital_inicial
     with open(ARCHIVO_DATOS, "w", encoding="utf-8") as f:
         json.dump(datos, f, indent=2, ensure_ascii=False)
-    print(f"  ✓ Portafolio guardado en '{ARCHIVO_DATOS}'")
+    print(f"  [OK] Portafolio guardado en '{ARCHIVO_DATOS}'")
 
 
 def cargar_portafolio():
@@ -701,7 +711,7 @@ def cargar_portafolio():
         portafolio = Portafolio.from_dict(datos)
         return portafolio, capital_inicial
     except Exception as e:
-        print(f"  ⚠ Error cargando portafolio: {e}")
+        print(f"  [!] Error cargando portafolio: {e}")
         return None, None
 
 
@@ -711,9 +721,9 @@ def cargar_portafolio():
 
 def mostrar_menu():
     """Imprime el menú de opciones del simulador."""
-    print("\n" + "─"*50)
+    print("\n" + "-"*50)
     print("  SIMULADOR DE PORTAFOLIO — MENÚ PRINCIPAL")
-    print("─"*50)
+    print("-"*50)
     print("  [1] Comprar acciones")
     print("  [2] Vender acciones")
     print("  [3] Agregar CDT (renta fija)")
@@ -727,7 +737,7 @@ def mostrar_menu():
     print(" [11] Graficar rentabilidad por acción")
     print(" [12] Guardar portafolio")
     print("  [0] Salir")
-    print("─"*50)
+    print("-"*50)
 
 
 def main():
@@ -735,10 +745,10 @@ def main():
     Función principal que controla el flujo del programa.
     Aquí arranca todo: carga o crea el portafolio y muestra el menú.
     """
-    print("\n" + "█"*50)
+    print("\n" + "#"*50)
     print("   SIMULADOR DE PORTAFOLIO DE INVERSIÓN v1.0")
     print("   Universidad — Finanzas Computacionales")
-    print("█"*50)
+    print("#"*50)
 
     # Intentar cargar portafolio existente
     portafolio, capital_inicial = cargar_portafolio()
@@ -760,7 +770,7 @@ def main():
                 print("  Ingresa un número válido.")
 
         portafolio = Portafolio(capital_inicial)
-        print(f"\n  ✓ Portafolio creado con ${capital_inicial:,.2f}")
+        print(f"\n  [OK] Portafolio creado con ${capital_inicial:,.2f}")
 
     # Bucle principal del menú
     while True:
@@ -771,11 +781,11 @@ def main():
             # Comprar acciones
             print("\n  Acciones disponibles:")
             for t, n in ACCIONES_DISPONIBLES.items():
-                en_portafolio = "✓" if t in portafolio.acciones else " "
+                en_portafolio = "[OK]" if t in portafolio.acciones else " "
                 print(f"  [{en_portafolio}] {t:<8} — {n}")
             ticker = input("\n  Ticker a comprar (ej: AAPL): ").strip().upper()
             if ticker not in ACCIONES_DISPONIBLES:
-                print(f"  ⚠ '{ticker}' no está en la lista. Verifica el ticker.")
+                print(f"  [!] '{ticker}' no está en la lista. Verifica el ticker.")
             else:
                 try:
                     cant = int(input("  Cantidad de acciones: "))
