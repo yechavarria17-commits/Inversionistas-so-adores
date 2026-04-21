@@ -35,8 +35,8 @@ import os                       # Para verificar si existen archivos
 # Estos valores se usan en todo el programa
 # ============================================================
 
-COMISION_BROKER = 0.001   # 0.1% de comisión por cada compra o venta
-IMPUESTO_DIVIDENDO = 0.10 # 10% de retención sobre dividendos recibidos
+COMISION_BROKER = 0.002   # Subimos al 0.2% por operación
+IMPUESTO_DIVIDENDO = 0.08  # Bajamos la retención al 8%
 ARCHIVO_DATOS = "portafolio_datos.json"  # Archivo donde se guarda el portafolio
 
 # Lista de 10 acciones disponibles para invertir (universo de acciones)
@@ -50,7 +50,10 @@ ACCIONES_DISPONIBLES = {
     "META":  "Meta Platforms",
     "BRK-B": "Berkshire Hathaway",
     "JPM":   "JPMorgan Chase",
-    "V":     "Visa Inc."
+    "V":     "Visa Inc.",
+    "NFLX":  "Netflix Inc.",
+    "COST":  "Costco Wholesale",
+    "BTC-USD": "Bitcoin (Yahoo Finance)"
 }
 
 
@@ -547,7 +550,7 @@ def graficar_evolucion_portafolio(portafolio: Portafolio):
     valores = [h["valor_total"] for h in portafolio.historial_valor]
 
     fig, ax = plt.subplots(figsize=(12, 5))
-    ax.plot(fechas, valores, marker='o', linewidth=2, color='steelblue', label='Valor total')
+    ax.plot(fechas, valores, marker='s', linewidth=3, color='darkgreen', label='Patrimonio Total')
     ax.fill_between(range(len(valores)), valores, alpha=0.15, color='steelblue')
 
     ax.set_title("Evolución del Valor del Portafolio", fontsize=14, fontweight='bold')
