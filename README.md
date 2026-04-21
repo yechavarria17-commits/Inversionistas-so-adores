@@ -72,6 +72,7 @@ El núcleo del programa utiliza una organización orientada a objetos para gesti
 ## 👥 Autores
 Desarrollado para la facultad de ingeniería/economía.
 **Usuario:** yechavarria17
+yeison alexander lopez
 
 ---
 *Este proyecto tiene fines académicos para el aprendizaje de estructuras de datos y lógica financiera.*
