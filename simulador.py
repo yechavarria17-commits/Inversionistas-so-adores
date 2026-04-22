@@ -351,7 +351,7 @@ def agregar_cdt(portafolio: Portafolio, monto: float, tasa_anual: float, dias_pl
 
     fecha_inicio = datetime.now().strftime("%Y-%m-%d")
     fecha_vencimiento = (datetime.now() + timedelta(days=dias_plazo)).strftime("%Y-%m-%d")
-    interes_diario = round(monto * (tasa_anual / 365), 4)
+    interes_diario = round(monto * (tasa_anual / 360), 4)
 
     cdt = {
         "id":               len(portafolio.cdts) + 1,
@@ -592,7 +592,7 @@ def graficar_composicion_portafolio(portafolio: Portafolio):
         print("  [!] El portafolio está vacío.")
         return
 
-    colores = plt.cm.Set3.colors[:len(etiquetas)]
+    colores = plt.cm.tab20c.colors[:len(etiquetas)]
 
     fig, ax = plt.subplots(figsize=(8, 8))
     wedges, texts, autotexts = ax.pie(
@@ -750,7 +750,7 @@ def main():
     """
     print("\n" + "#"*50)
     print("   SIMULADOR DE PORTAFOLIO DE INVERSIÓN v1.0")
-    print("   Universidad — Finanzas Computacionales")
+    print("   Universidad — Estructura de Dactos")
     print("#"*50)
 
     # Intentar cargar portafolio existente
