@@ -53,7 +53,13 @@ ACCIONES_DISPONIBLES = {
     "V":     "Visa Inc.",
     "NFLX":  "Netflix Inc.",
     "COST":  "Costco Wholesale",
-    "BTC-USD": "Bitcoin (Yahoo Finance)"
+    "BTC-USD": "Bitcoin (Yahoo Finance)",
+    "WMT":   "Walmart Inc.",
+    "JNJ":   "Johnson & Johnson",
+    "PG":    "Procter & Gamble",
+    "XOM":   "Exxon Mobil Corp.",
+    "DIS":   "The Walt Disney Co.",
+    "KO":    "Coca-Cola Company"
 }
 
 
