@@ -725,6 +725,9 @@ def cargar_portafolio():
 
 
 # ============================================================
+
+def consultar_fundamentales(ticker: str):
+    pass
 # MENÚ PRINCIPAL
 # ============================================================
 
