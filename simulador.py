@@ -731,6 +731,9 @@ def consultar_fundamentales(ticker: str):
 
 def maquina_del_tiempo(ticker: str, inversion: float, anios: int):
     pass
+
+def comparar_acciones(ticker1: str, ticker2: str, dias: int = 180):
+    pass
 # MENÚ PRINCIPAL
 # ============================================================
 
