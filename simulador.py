@@ -728,6 +728,9 @@ def cargar_portafolio():
 
 def consultar_fundamentales(ticker: str):
     pass
+
+def maquina_del_tiempo(ticker: str, inversion: float, anios: int):
+    pass
 # MENÚ PRINCIPAL
 # ============================================================
 
