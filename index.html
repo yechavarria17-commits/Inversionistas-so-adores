@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Portafolio</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --green:       #00ff88;
+    --green-dim:   #00cc6a;
+    --green-dark:  #004d28;
+    --green-glow:  rgba(0,255,136,0.15);
+    --bg:          #0a0a0a;
+    --card:        #111111;
+    --card2:       #161616;
+    --border:      #1f1f1f;
+    --text:        #e0e0e0;
+    --text-muted:  #666;
+    --red:         #ff4d4d;
+    --yellow:      #ffd700;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: #0d0d0d;
+    border-bottom: 1px solid var(--green-dark);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,255,136,0.08);
+  }
+
+  header h1 {
+    font-size: 1.3rem;
+    color: var(--green);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px var(--green);
+  }
+
+  header .live-time {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-family: monospace;
+  }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── METRIC CARDS ── */
+  .metric {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .metric:hover { border-color: var(--green-dark); }
+
+  .metric::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+
+  .metric .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+  .metric .value { font-size: 1.6rem; font-weight: 700; color: var(--green); margin: 0.3rem 0; font-family: monospace; }
+  .metric .sub   { font-size: 0.75rem; color: var(--text-muted); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 0.55rem 1.1rem;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-green  { background: var(--green); color: #000; }
+  .btn-green:hover { background: var(--green-dim); box-shadow: 0 0 15px var(--green-glow); }
+  .btn-red    { background: #2a0000; color: var(--red); border: 1px solid #500; }
+  .btn-red:hover { background: #3d0000; }
+  .btn-outline { background: transparent; color: var(--green); border: 1px solid var(--green-dark); }
+  .btn-outline:hover { background: var(--green-glow); }
+  .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.78rem; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── FORMS ── */
+  .form-group { margin-bottom: 0.8rem; }
+  .form-group label { display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 0.5rem 0.75rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--green-dark); }
+  .form-group select option { background: #111; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { padding: 0.6rem; text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+  td { padding: 0.6rem; border-bottom: 1px solid #161616; vertical-align: middle; }
+  tr:hover td { background: #141414; }
+
+  .pos  { color: var(--green); font-weight: 600; }
+  .neg  { color: var(--red);   font-weight: 600; }
+  .tag-buy  { background: #002a14; color: var(--green); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; }
+  .tag-sell { background: #2a0000; color: var(--red);   padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; }
+  .tag-cdt  { background: #1a1400; color: var(--yellow); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; }
+
+  /* ── CHARTS ── */
+  .chart-wrap { position: relative; height: 260px; }
+  .chart-wrap-sm { position: relative; height: 200px; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.ok   { background: #002a14; color: var(--green); border: 1px solid var(--green-dark); }
+  #toast.err  { background: #2a0000; color: var(--red);   border: 1px solid #500; }
+
+  /* ── SETUP SCREEN ── */
+  #setupScreen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 80vh; text-align: center;
+  }
+  #setupScreen h2 { color: var(--green); font-size: 2rem; margin-bottom: 0.5rem; text-shadow: 0 0 30px var(--green); }
+  #setupScreen p  { color: var(--text-muted); margin-bottom: 2rem; }
+  #setupScreen input {
+    background: #111; border: 1px solid var(--green-dark); color: var(--text);
+    padding: 0.75rem 1.25rem; border-radius: 8px; font-size: 1.1rem; text-align: center;
+    width: 280px; outline: none; margin-bottom: 1rem;
+  }
+
+  /* ── LOADER ── */
+  .loader { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--green-dark); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── TICKER BADGE ── */
+  .ticker-badge {
+    background: var(--green-dark); color: var(--green);
+    padding: 0.2rem 0.6rem; border-radius: 5px;
+    font-size: 0.75rem; font-weight: 700; font-family: monospace;
+  }
+
+  /* ── CDT CARD ── */
+  .cdt-card {
+    background: #0f0f0f; border: 1px solid #1a1400; border-radius: 8px;
+    padding: 0.9rem; margin-bottom: 0.6rem;
+  }
+  .cdt-card .cdt-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+  .progress-bar { background: #1a1400; border-radius: 4px; height: 6px; overflow: hidden; margin-top: 0.5rem; }
+  .progress-fill { background: var(--yellow); height: 100%; border-radius: 4px; transition: width 0.5s; }
+
+  @media (max-width: 900px) {
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SIMULADOR DE PORTAFOLIO</h1>
+  <span class="live-time" id="liveTime"></span>
+</header>
+
+<!-- SETUP SCREEN -->
+<div id="setupScreen" class="container">
+  <h2>Bienvenido</h2>
+  <p>No tienes un portafolio activo. Ingresa tu capital inicial para comenzar.</p>
+  <input type="number" id="capitalInicial" placeholder="$10,000.00" value="10000" min="100">
+  <br>
+  <button class="btn btn-green" onclick="crearPortafolio()" style="padding: 0.75rem 2.5rem; font-size: 1rem;">
+    Crear Portafolio
+  </button>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+<div class="container">
+
+  <!-- METRICS -->
+  <div class="grid-4" id="metricsRow">
+    <div class="metric">
+      <div class="label">Valor Total</div>
+      <div class="value" id="mValorTotal">$0</div>
+      <div class="sub" id="mFecha">—</div>
+    </div>
+    <div class="metric">
+      <div class="label">Capital en Caja</div>
+      <div class="value" id="mCapital">$0</div>
+      <div class="sub" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Disponible para invertir</span>
+        <button class="btn btn-outline btn-sm" onclick="abrirModalCapital()" style="padding:0.15rem 0.55rem;font-size:0.68rem;margin-left:0.5rem;">Editar</button>
+      </div>
+    </div>
+    <div class="metric">
+      <div class="label">Acciones</div>
+      <div class="value" id="mAcciones">$0</div>
+      <div class="sub" id="mAccionesSub">0 posiciones</div>
+    </div>
+    <div class="metric">
+      <div class="label">CDTs</div>
+      <div class="value" id="mCDTs" style="color: var(--yellow);">$0</div>
+      <div class="sub" id="mCDTsSub">0 activos</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('mercado')">Mercado</button>
+    <button class="tab-btn" onclick="switchTab('acciones')">Mis Acciones</button>
+    <button class="tab-btn" onclick="switchTab('cdts')">CDTs</button>
+    <button class="tab-btn" onclick="switchTab('historial')">Historial</button>
+  </div>
+
+  <!-- ═══════ DASHBOARD ═══════ -->
+  <div id="tab-dashboard" class="tab-panel active">
+    <div class="grid-2">
+
+      <!-- Evolución del portafolio -->
+      <div class="card">
+        <div class="card-title">Evolución del Portafolio</div>
+        <div class="chart-wrap">
+          <canvas id="chartEvolucion"></canvas>
+        </div>
+      </div>
+
+      <!-- Composición -->
+      <div class="card">
+        <div class="card-title">Composición del Portafolio</div>
+        <div class="chart-wrap">
+          <canvas id="chartComposicion"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Posiciones actuales (tabla rápida) -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <div class="card-title" style="margin:0;">Posiciones Actuales</div>
+        <button class="btn btn-outline btn-sm" onclick="refreshData()">Actualizar precios</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Ticker</th><th>Empresa</th><th>Cantidad</th><th>P. Promedio</th><th>P. Actual</th><th>Valor</th><th>G/P</th></tr>
+        </thead>
+        <tbody id="tablaPosiciones">
+          <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:2rem;">Sin posiciones aún</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Resumen financiero -->
+    <div class="grid-3" style="margin-top: 1.5rem;">
+      <div class="card">
+        <div class="card-title">Dividendos Recibidos</div>
+        <div style="font-size:1.4rem; font-weight:700; color:var(--green); font-family:monospace;" id="sDividendos">$0.00</div>
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem;">Neto después de retención 8%</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Comisiones Pagadas</div>
+        <div style="font-size:1.4rem; font-weight:700; color:var(--red); font-family:monospace;" id="sComisiones">$0.00</div>
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem;">0.2% por operación (broker)</div>
+      </div>
+      <div class="card" style="display:flex; flex-direction:column; gap:0.5rem;">
+        <div class="card-title">Acciones Rápidas</div>
+        <button class="btn btn-outline" onclick="cerrarDia()" style="width:100%; justify-content:center;">
+          Cerrar Dia (CDTs + Dividendos)
+        </button>
+        <button class="btn btn-outline" onclick="refreshData()" style="width:100%; justify-content:center;">
+          Refrescar Todo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ MERCADO ═══════ -->
+  <div id="tab-mercado" class="tab-panel">
+    <div class="grid-2">
+
+      <!-- Comprar / Vender -->
+      <div>
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-title" style="margin-bottom:1rem;">COMPRAR ACCION</div>
+          <div class="form-group">
+            <label>Ticker</label>
+            <select id="buyTicker">
+              <option value="">Seleccionar...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cantidad</label>
+            <input type="number" id="buyCantidad" min="1" value="1" placeholder="1">
+          </div>
+          <div id="buyPrecioInfo" style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.75rem; min-height:1.2rem;"></div>
+          <button class="btn btn-green" style="width:100%;" onclick="comprar()">Comprar</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:1rem;">VENDER ACCION</div>
+          <div class="form-group">
+            <label>Ticker (de tu portafolio)</label>
+            <select id="sellTicker">
+              <option value="">Seleccionar...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cantidad</label>
+            <input type="number" id="sellCantidad" min="1" value="1">
+          </div>
+          <button class="btn btn-red" style="width:100%;" onclick="vender()">Vender</button>
+        </div>
+      </div>
+
+      <!-- Gráfico de precio de acción -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <div class="card-title" style="margin:0;">Historial de Precio</div>
+          <div style="display:flex; gap:0.5rem;">
+            <select id="chartTicker" style="background:#0d0d0d; border:1px solid var(--border); color:var(--text); padding:0.35rem 0.6rem; border-radius:6px; font-size:0.8rem;">
+              <option value="">Ticker...</option>
+            </select>
+            <select id="chartDias" style="background:#0d0d0d; border:1px solid var(--border); color:var(--text); padding:0.35rem 0.6rem; border-radius:6px; font-size:0.8rem;" onchange="cargarGraficoPrecio()">
+              <option value="7">7d</option>
+              <option value="30" selected>30d</option>
+              <option value="90">90d</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-wrap" style="height:280px;">
+          <canvas id="chartPrecio"></canvas>
+        </div>
+        <div id="precioCurrent" style="text-align:center; margin-top:0.75rem; font-size:0.85rem; color:var(--text-muted);"></div>
+      </div>
+    </div>
+
+    <!-- Mercado: tabla de acciones disponibles -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:1rem;">Acciones Disponibles</div>
+      <table>
+        <thead>
+          <tr><th>Ticker</th><th>Empresa</th><th>Precio</th><th>Mín. Día</th><th>Máx. Día</th><th>Acción</th></tr>
+        </thead>
+        <tbody id="tablaAccionesDisp"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════ MIS ACCIONES ═══════ -->
+  <div id="tab-acciones" class="tab-panel">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:1rem;">Mis Posiciones en Renta Variable</div>
+      <table>
+        <thead>
+          <tr><th>Ticker</th><th>Empresa</th><th>Cantidad</th><th>P. Promedio</th><th>P. Actual</th><th>Valor</th><th>G/P $</th><th>G/P %</th></tr>
+        </thead>
+        <tbody id="tablaAcciones">
+          <tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:2rem;">Sin acciones en portafolio</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Rentabilidad por acción (gráfico barras) -->
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="card-title">Rentabilidad Neta por Acción (G/P en USD)</div>
+      <div class="chart-wrap">
+        <canvas id="chartRentabilidad"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ CDTs ═══════ -->
+  <div id="tab-cdts" class="tab-panel">
+    <div class="grid-2">
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1rem;">NUEVO CDT</div>
+        <div class="form-group">
+          <label>Monto (USD)</label>
+          <input type="number" id="cdtMonto" placeholder="1000" min="100">
+        </div>
+        <div class="form-group">
+          <label>Tasa Anual (%)</label>
+          <input type="number" id="cdtTasa" placeholder="12" step="0.1" min="1" max="50">
+        </div>
+        <div class="form-group">
+          <label>Plazo (días)</label>
+          <input type="number" id="cdtDias" placeholder="90" min="1">
+        </div>
+        <div id="cdtCalculo" style="font-size:0.8rem; color:var(--yellow); margin-bottom:0.75rem; min-height:1.2rem;"></div>
+        <button class="btn btn-green" style="width:100%;" onclick="crearCDT()">Crear CDT</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:1rem;">CDTs Activos</div>
+        <div id="listaCDTs">
+          <p style="color:var(--text-muted); text-align:center; padding:2rem;">Sin CDTs activos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ HISTORIAL ═══════ -->
+  <div id="tab-historial" class="tab-panel">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:1rem;">Últimas 50 Transacciones</div>
+      <table>
+        <thead>
+          <tr><th>Fecha</th><th>Tipo</th><th>Ticker</th><th>Cantidad</th><th>Precio</th><th>Total</th><th>G/P</th><th>Capital Restante</th></tr>
+        </thead>
+        <tbody id="tablaHistorial">
+          <tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:2rem;">Sin transacciones</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /container -->
+</div><!-- /mainApp -->
+
+<!-- Modal cambiar capital -->
+<div id="modalCapital" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;justify-content:center;align-items:center;">
+  <div style="background:#111;border:1px solid var(--green-dark);border-radius:12px;padding:2rem;width:320px;text-align:center;">
+    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:1rem;">Ajustar Capital Disponible</div>
+    <input type="number" id="nuevoCapital" min="0" step="0.01"
+      style="width:100%;background:#0d0d0d;border:1px solid var(--green-dark);border-radius:7px;padding:0.6rem 1rem;color:var(--green);font-size:1.2rem;text-align:center;outline:none;margin-bottom:1rem;">
+    <div style="display:flex;gap:0.75rem;">
+      <button class="btn btn-outline" style="flex:1;" onclick="cerrarModalCapital()">Cancelar</button>
+      <button class="btn btn-green" style="flex:1;" onclick="guardarCapital()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── Estado global ──────────────────────────────────────────────────────────
+let portafolioData  = null;
+let accionesDisp    = {};
+let chartEvolucion  = null;
+let chartComposicion = null;
+let chartPrecio     = null;
+let chartRentabilidad = null;
+
+// ─── Utilidades ──────────────────────────────────────────────────────────────
+const fmt = (n) => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
+
+function toast(msg, tipo = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${tipo}`;
+  setTimeout(() => el.className = '', 3500);
+}
+
+function setLoading(btnId, state) {
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = state;
+}
+
+// Reloj en tiempo real
+function updateClock() {
+  document.getElementById('liveTime').textContent = new Date().toLocaleString('es-CO');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'mercado') cargarTablaDisponibles();
+  if (name === 'acciones') renderChartRentabilidad();
+}
+
+// ─── Inicialización ──────────────────────────────────────────────────────────
+async function init() {
+  // Cargar acciones disponibles
+  const r = await fetch('/api/acciones');
+  accionesDisp = await r.json();
+
+  // Poblar selects
+  const options = Object.entries(accionesDisp)
+    .map(([t,n]) => `<option value="${t}">${t} — ${n}</option>`).join('');
+  document.getElementById('buyTicker').innerHTML   = '<option value="">Seleccionar...</option>' + options;
+  document.getElementById('chartTicker').innerHTML = '<option value="">Ticker...</option>'      + options;
+
+  // Intentar cargar portafolio
+  try {
+    const rp = await fetch('/api/portafolio');
+    if (rp.ok) {
+      portafolioData = await rp.json();
+      showApp();
+    } else {
+      document.getElementById('setupScreen').style.display = 'flex';
+    }
+  } catch {
+    document.getElementById('setupScreen').style.display = 'flex';
+  }
+
+  // Listeners
+  document.getElementById('buyTicker').addEventListener('change', mostrarPrecioCompra);
+  document.getElementById('chartTicker').addEventListener('change', cargarGraficoPrecio);
+  document.getElementById('cdtMonto').addEventListener('input', calcularCDT);
+  document.getElementById('cdtTasa').addEventListener('input', calcularCDT);
+  document.getElementById('cdtDias').addEventListener('input', calcularCDT);
+}
+
+function showApp() {
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  renderAll();
+}
+
+// ─── Render principal ────────────────────────────────────────────────────────
+function renderAll() {
+  if (!portafolioData) return;
+  const d = portafolioData;
+
+  // Métricas
+  document.getElementById('mValorTotal').textContent  = fmt(d.valor_total);
+  document.getElementById('mCapital').textContent     = fmt(d.capital_caja);
+  document.getElementById('mAcciones').textContent    = fmt(d.valor_acciones);
+  document.getElementById('mCDTs').textContent        = fmt(d.valor_cdts);
+  document.getElementById('mAccionesSub').textContent = `${d.detalle_acciones.length} posiciones`;
+  document.getElementById('mCDTsSub').textContent     = `${d.cdts.filter(c=>c.activo).length} activos`;
+  document.getElementById('mFecha').textContent       = new Date().toLocaleString('es-CO');
+  document.getElementById('sDividendos').textContent  = fmt(d.dividendos_recibidos);
+  document.getElementById('sComisiones').textContent  = fmt(d.comisiones_pagadas);
+
+  // Tablas
+  renderTablaPosiciones(d.detalle_acciones);
+  renderTablaAcciones(d.detalle_acciones);
+  renderTablaHistorial(d.historial_transacciones);
+  renderCDTs(d.cdts);
+  renderSellTicker(d.detalle_acciones);
+
+  // Gráficos
+  renderChartEvolucion(d.historial_valor);
+  renderChartComposicion(d);
+  renderChartRentabilidad();
+}
+
+// ─── Tablas ──────────────────────────────────────────────────────────────────
+function renderTablaPosiciones(items) {
+  const tb = document.getElementById('tablaPosiciones');
+  if (!items.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin posiciones</td></tr>'; return; }
+  tb.innerHTML = items.map(a => {
+    const gp = a.ganancia_perdida;
+    return `<tr>
+      <td><span class="ticker-badge">${a.ticker}</span></td>
+      <td style="color:var(--text-muted)">${accionesDisp[a.ticker] || a.ticker}</td>
+      <td>${a.cantidad}</td>
+      <td style="font-family:monospace">${fmt(a.precio_promedio)}</td>
+      <td style="font-family:monospace">${fmt(a.precio_actual)}</td>
+      <td style="font-family:monospace;font-weight:600">${fmt(a.valor_actual)}</td>
+      <td class="${gp>=0?'pos':'neg'}">${gp>=0?'+':''}${fmt(gp)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTablaAcciones(items) {
+  const tb = document.getElementById('tablaAcciones');
+  if (!items.length) { tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin acciones</td></tr>'; return; }
+  tb.innerHTML = items.map(a => {
+    const gp  = a.ganancia_perdida;
+    const pct = ((a.precio_actual - a.precio_promedio) / a.precio_promedio * 100).toFixed(2);
+    return `<tr>
+      <td><span class="ticker-badge">${a.ticker}</span></td>
+      <td style="color:var(--text-muted)">${accionesDisp[a.ticker] || ''}</td>
+      <td>${a.cantidad}</td>
+      <td style="font-family:monospace">${fmt(a.precio_promedio)}</td>
+      <td style="font-family:monospace">${fmt(a.precio_actual)}</td>
+      <td style="font-family:monospace;font-weight:600">${fmt(a.valor_actual)}</td>
+      <td class="${gp>=0?'pos':'neg'}">${gp>=0?'+':''}${fmt(gp)}</td>
+      <td class="${pct>=0?'pos':'neg'}">${pct>=0?'+':''}${pct}%</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTablaHistorial(items) {
+  const tb = document.getElementById('tablaHistorial');
+  if (!items || !items.length) { tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">Sin transacciones</td></tr>'; return; }
+  tb.innerHTML = [...items].reverse().map(t => {
+    const tag = t.tipo==='COMPRA' ? 'tag-buy' : 'tag-sell';
+    const gp  = t.ganancia != null ? `<span class="${t.ganancia>=0?'pos':'neg'}">${t.ganancia>=0?'+':''}${fmt(t.ganancia)}</span>` : '—';
+    return `<tr>
+      <td style="font-size:0.75rem;color:var(--text-muted)">${t.fecha}</td>
+      <td><span class="${tag}">${t.tipo}</span></td>
+      <td><span class="ticker-badge">${t.ticker}</span></td>
+      <td>${t.cantidad}</td>
+      <td style="font-family:monospace">${fmt(t.precio)}</td>
+      <td style="font-family:monospace">${fmt(t.total)}</td>
+      <td>${gp}</td>
+      <td style="font-family:monospace">${fmt(t.capital_restante)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCDTs(cdts) {
+  const div = document.getElementById('listaCDTs');
+  const activos = cdts.filter(c => c.activo);
+  if (!activos.length) { div.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">Sin CDTs activos</p>'; return; }
+  div.innerHTML = activos.map(c => {
+    const pct = Math.min(100, (c.dias_transcurridos / c.dias_plazo) * 100).toFixed(1);
+    return `<div class="cdt-card">
+      <div class="cdt-top">
+        <span style="color:var(--yellow);font-weight:700;">CDT #${c.id}</span>
+        <span style="font-family:monospace;color:var(--green);">${fmt(c.monto_inicial + c.intereses_acumulados)}</span>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-muted);">
+        ${fmt(c.monto_inicial)} · ${(c.tasa_anual*100).toFixed(1)}% anual · ${c.dias_plazo} días
+        &nbsp;|&nbsp; Interés diario: ${fmt(c.interes_diario)}
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">
+        Intereses acumulados: <span style="color:var(--yellow)">${fmt(c.intereses_acumulados)}</span>
+        &nbsp;|&nbsp; Vence: ${c.fecha_vencimiento}
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.25rem;">Día ${c.dias_transcurridos} de ${c.dias_plazo} (${pct}%)</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSellTicker(items) {
+  const sel = document.getElementById('sellTicker');
+  sel.innerHTML = '<option value="">Seleccionar...</option>' +
+    items.map(a => `<option value="${a.ticker}">${a.ticker} (${a.cantidad} acc.)</option>`).join('');
+}
+
+// ─── Gráficos ─────────────────────────────────────────────────────────────────
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#888', font: { size: 11 } } } }
+};
+
+function renderChartEvolucion(historial) {
+  const ctx = document.getElementById('chartEvolucion').getContext('2d');
+  if (chartEvolucion) chartEvolucion.destroy();
+  if (!historial || historial.length < 2) {
+    // Placeholder
+    const labels = ['Inicio'];
+    const vals   = [portafolioData.valor_total];
+    historial = [{ fecha:'Inicio', valor: portafolioData.valor_total }];
+  }
+  const labels = historial.map(h => h.fecha);
+  const vals   = historial.map(h => h.valor);
+  chartEvolucion = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Valor Total ($)',
+        data: vals,
+        borderColor: '#00ff88',
+        backgroundColor: 'rgba(0,255,136,0.07)',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#00ff88',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        x: { ticks: { color:'#555', maxTicksLimit: 6, font:{size:10} }, grid: { color:'#1a1a1a' } },
+        y: { ticks: { color:'#555', callback: v => '$'+v.toLocaleString() }, grid: { color:'#1a1a1a' } }
+      }
+    }
+  });
+}
+
+function renderChartComposicion(d) {
+  const ctx = document.getElementById('chartComposicion').getContext('2d');
+  if (chartComposicion) chartComposicion.destroy();
+  const labels = ['Efectivo','Acciones','CDTs'];
+  const vals   = [d.capital_caja, d.valor_acciones, d.valor_cdts];
+  chartComposicion = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: vals,
+        backgroundColor: ['#00ff88','#00cc6a','#ffd700'],
+        borderColor: '#0a0a0a',
+        borderWidth: 3
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      cutout: '65%',
+      plugins: {
+        legend: { position:'bottom', labels: { color:'#888', padding:16, font:{size:11} } }
+      }
+    }
+  });
+}
+
+function renderChartRentabilidad() {
+  const ctx = document.getElementById('chartRentabilidad').getContext('2d');
+  if (chartRentabilidad) chartRentabilidad.destroy();
+  if (!portafolioData || !portafolioData.detalle_acciones.length) return;
+  const items = portafolioData.detalle_acciones;
+  chartRentabilidad = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: items.map(a => a.ticker),
+      datasets: [{
+        label: 'Ganancia/Pérdida ($)',
+        data:  items.map(a => a.ganancia_perdida),
+        backgroundColor: items.map(a => a.ganancia_perdida >= 0 ? 'rgba(0,255,136,0.6)' : 'rgba(255,77,77,0.6)'),
+        borderColor:     items.map(a => a.ganancia_perdida >= 0 ? '#00ff88' : '#ff4d4d'),
+        borderWidth: 1,
+        borderRadius: 5
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        x: { ticks: { color:'#666' }, grid: { color:'#1a1a1a' } },
+        y: { ticks: { color:'#666', callback: v => '$'+v.toLocaleString() }, grid: { color:'#1a1a1a' } }
+      }
+    }
+  });
+}
+
+async function cargarGraficoPrecio() {
+  const ticker = document.getElementById('chartTicker').value;
+  const dias   = document.getElementById('chartDias').value;
+  if (!ticker) return;
+
+  const ctx = document.getElementById('chartPrecio').getContext('2d');
+  if (chartPrecio) chartPrecio.destroy();
+
+  const r = await fetch(`/api/historial/${ticker}?dias=${dias}`);
+  if (!r.ok) { toast('No se pudo cargar historial', 'err'); return; }
+  const data = await r.json();
+
+  chartPrecio = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.fechas,
+      datasets: [{
+        label: `${ticker} - Precio Cierre`,
+        data: data.precios,
+        borderColor: '#00ff88',
+        backgroundColor: 'rgba(0,255,136,0.06)',
+        borderWidth: 2,
+        pointRadius: 1,
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        x: { ticks: { color:'#555', maxTicksLimit:6, font:{size:10} }, grid:{color:'#1a1a1a'} },
+        y: { ticks: { color:'#555', callback: v => '$'+v }, grid:{color:'#1a1a1a'} }
+      }
+    }
+  });
+
+  const ultimo = data.precios[data.precios.length-1];
+  const primero = data.precios[0];
+  const diff = ((ultimo-primero)/primero*100).toFixed(2);
+  document.getElementById('precioCurrent').innerHTML =
+    `Último precio: <strong style="color:var(--green)">${fmt(ultimo)}</strong> &nbsp;|&nbsp; Variación ${dias}d: <span class="${diff>=0?'pos':'neg'}">${diff>=0?'+':''}${diff}%</span>`;
+}
+
+async function mostrarPrecioCompra() {
+  const ticker = document.getElementById('buyTicker').value;
+  const el = document.getElementById('buyPrecioInfo');
+  if (!ticker) { el.textContent = ''; return; }
+  el.innerHTML = '<span class="loader"></span> Consultando precio...';
+  const r = await fetch(`/api/precio/${ticker}`);
+  if (r.ok) {
+    const d = await r.json();
+    el.innerHTML = `Precio: <strong style="color:var(--green)">${fmt(d.cierre)}</strong> &nbsp;|&nbsp; Rango: ${fmt(d.minimo)} – ${fmt(d.maximo)} &nbsp;|&nbsp; Fecha: ${d.fecha}`;
+  } else {
+    el.innerHTML = '<span style="color:var(--red)">No se pudo obtener precio</span>';
+  }
+}
+
+async function cargarTablaDisponibles() {
+  const tb = document.getElementById('tablaAccionesDisp');
+  tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;"><span class="loader"></span> Cargando precios del mercado...</td></tr>';
+  const entries = Object.entries(accionesDisp).slice(0, 8); // primeros 8 para no sobrecargar
+  const rows = await Promise.all(entries.map(async ([ticker, nombre]) => {
+    const r = await fetch(`/api/precio/${ticker}`);
+    if (!r.ok) return `<tr><td><span class="ticker-badge">${ticker}</span></td><td>${nombre}</td><td colspan="4" style="color:var(--text-muted)">Sin datos</td></tr>`;
+    const d = await r.json();
+    return `<tr>
+      <td><span class="ticker-badge">${ticker}</span></td>
+      <td style="color:var(--text-muted)">${nombre}</td>
+      <td style="font-family:monospace;color:var(--green);font-weight:600">${fmt(d.cierre)}</td>
+      <td style="font-family:monospace;color:var(--red)">${fmt(d.minimo)}</td>
+      <td style="font-family:monospace;color:var(--green)">${fmt(d.maximo)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="document.getElementById('buyTicker').value='${ticker}';mostrarPrecioCompra();switchTab('mercado')">Comprar</button></td>
+    </tr>`;
+  }));
+  tb.innerHTML = rows.join('');
+}
+
+function calcularCDT() {
+  const monto = parseFloat(document.getElementById('cdtMonto').value) || 0;
+  const tasa  = parseFloat(document.getElementById('cdtTasa').value)  || 0;
+  const dias  = parseInt(document.getElementById('cdtDias').value)    || 0;
+  if (monto && tasa && dias) {
+    const diario = monto * (tasa/100/360);
+    const total  = diario * dias;
+    document.getElementById('cdtCalculo').innerHTML =
+      `Interés diario: <strong>${fmt(diario)}</strong> · Total al vencimiento: <strong style="color:var(--yellow)">${fmt(monto+total)}</strong>`;
+  }
+}
+
+// ─── Acciones del usuario ─────────────────────────────────────────────────────
+async function crearPortafolio() {
+  const capital = parseFloat(document.getElementById('capitalInicial').value);
+  if (!capital || capital < 100) { toast('Ingresa un capital válido (mínimo $100)', 'err'); return; }
+  const r = await fetch('/api/crear', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({capital}) });
+  if (r.ok) {
+    await refreshData();
+    showApp();
+    toast(`Portafolio creado con ${fmt(capital)}`, 'ok');
+  }
+}
+
+async function refreshData() {
+  const r = await fetch('/api/portafolio');
+  if (r.ok) {
+    portafolioData = await r.json();
+    renderAll();
+  }
+}
+
+async function comprar() {
+  const ticker   = document.getElementById('buyTicker').value;
+  const cantidad = parseInt(document.getElementById('buyCantidad').value);
+  if (!ticker || !cantidad || cantidad < 1) { toast('Selecciona un ticker y cantidad válida', 'err'); return; }
+  const r = await fetch('/api/comprar', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ticker, cantidad}) });
+  const d = await r.json();
+  if (d.ok) { toast(`Compra de ${cantidad} ${ticker} exitosa`, 'ok'); await refreshData(); }
+  else       { toast(`Error: ${d.error}`, 'err'); }
+}
+
+async function vender() {
+  const ticker   = document.getElementById('sellTicker').value;
+  const cantidad = parseInt(document.getElementById('sellCantidad').value);
+  if (!ticker || !cantidad || cantidad < 1) { toast('Selecciona un ticker y cantidad válida', 'err'); return; }
+  const r = await fetch('/api/vender', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ticker, cantidad}) });
+  const d = await r.json();
+  if (d.ok) { toast(`Venta de ${cantidad} ${ticker} exitosa`, 'ok'); await refreshData(); }
+  else       { toast(`Error: ${d.error}`, 'err'); }
+}
+
+async function crearCDT() {
+  const monto = parseFloat(document.getElementById('cdtMonto').value);
+  const tasa  = parseFloat(document.getElementById('cdtTasa').value) / 100;
+  const dias  = parseInt(document.getElementById('cdtDias').value);
+  if (!monto || !tasa || !dias) { toast('Completa todos los campos del CDT', 'err'); return; }
+  const r = await fetch('/api/cdt', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({monto, tasa, dias}) });
+  const d = await r.json();
+  if (d.ok) { toast('CDT creado exitosamente', 'ok'); await refreshData(); }
+  else       { toast(`Error: ${d.error}`, 'err'); }
+}
+
+async function cerrarDia() {
+  const r = await fetch('/api/cerrar-dia', { method:'POST' });
+  if (r.ok) { toast('Dia cerrado: intereses y dividendos aplicados', 'ok'); await refreshData(); }
+}
+
+// ─── Modal Capital ────────────────────────────────────────────────────────────
+function abrirModalCapital() {
+  const modal = document.getElementById('modalCapital');
+  document.getElementById('nuevoCapital').value = portafolioData ? portafolioData.capital_caja.toFixed(2) : '';
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('nuevoCapital').focus(), 100);
+}
+
+function cerrarModalCapital() {
+  document.getElementById('modalCapital').style.display = 'none';
+}
+
+async function guardarCapital() {
+  const nuevo = parseFloat(document.getElementById('nuevoCapital').value);
+  if (isNaN(nuevo) || nuevo < 0) { toast('Ingresa un valor valido', 'err'); return; }
+  const r = await fetch('/api/capital', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ capital: nuevo })
+  });
+  if (r.ok) {
+    cerrarModalCapital();
+    toast('Capital actualizado correctamente', 'ok');
+    await refreshData();
+  } else {
+    toast('Error al actualizar capital', 'err');
+  }
+}
+
+// Cerrar modal al hacer clic afuera
+document.getElementById('modalCapital').addEventListener('click', function(e) {
+  if (e.target === this) cerrarModalCapital();
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
