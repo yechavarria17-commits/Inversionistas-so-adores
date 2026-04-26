@@ -725,15 +725,93 @@ def cargar_portafolio():
 
 
 # ============================================================
+# FUNCIONES AVANZADAS DE ANÁLISIS
+# ============================================================
 
 def consultar_fundamentales(ticker: str):
-    pass
+    """Consulta datos financieros fundamentales de una empresa."""
+    try:
+        print(f"\n  Consultando datos fundamentales de {ticker}...")
+        accion = yf.Ticker(ticker)
+        info = accion.info
+        print(f"\n  [INFO] Fundamentales de {ACCIONES_DISPONIBLES.get(ticker, ticker)}:")
+        print(f"  Sector: {info.get('sector', 'N/A')}")
+        print(f"  Industria: {info.get('industry', 'N/A')}")
+        print(f"  Market Cap: ${info.get('marketCap', 0):,.2f}")
+        print(f"  PER (Price-to-Earnings): {info.get('trailingPE', 'N/A')}")
+        print(f"  Recomendación Analistas: {info.get('recommendationKey', 'N/A').upper()}")
+    except Exception as e:
+        print(f"  [!] No se pudieron obtener los fundamentales: {e}")
 
 def maquina_del_tiempo(ticker: str, inversion: float, anios: int):
-    pass
+    """Simula qué hubiera pasado si invertías hace X años."""
+    try:
+        print(f"\n  Viajando en el tiempo {anios} años para {ticker}...")
+        accion = yf.Ticker(ticker)
+        fecha_pasado = datetime.now() - timedelta(days=anios*365)
+        historial = accion.history(start=fecha_pasado - timedelta(days=5), end=fecha_pasado + timedelta(days=5))
+        
+        if historial.empty:
+            print("  [!] No hay datos históricos para esa fecha.")
+            return
+        
+        precio_pasado = float(historial.iloc[0]["Close"])
+        cantidad = inversion / precio_pasado
+        
+        precio_actual_dict = obtener_precio_accion(ticker)
+        if not precio_actual_dict: return
+        precio_actual = precio_actual_dict["cierre"]
+        
+        divs = accion.dividends
+        divs_periodo = divs[divs.index > pd.Timestamp(fecha_pasado, tz='America/New_York')] if not divs.empty else pd.Series(dtype=float)
+        total_dividendos_por_accion = float(divs_periodo.sum()) if not divs_periodo.empty else 0.0
+        dividendos_ganados = total_dividendos_por_accion * cantidad
+        
+        valor_actual = cantidad * precio_actual
+        ganancia_total = (valor_actual + dividendos_ganados) - inversion
+        retorno_pct = (ganancia_total / inversion) * 100
+        
+        print(f"\n  [MÁQUINA DEL TIEMPO] Inversión de ${inversion:,.2f} en {ticker} hace {anios} años:")
+        print(f"  Precio compra hace {anios} años: ${precio_pasado:.2f}")
+        print(f"  Cantidad de acciones compradas: {cantidad:.4f}")
+        print(f"  Precio actual: ${precio_actual:.2f}")
+        print(f"  Valor actual de las acciones: ${valor_actual:,.2f}")
+        print(f"  Dividendos recibidos en el periodo: ${dividendos_ganados:,.2f}")
+        print(f"  Ganancia Total (Crecimiento + Dividendos): ${ganancia_total:,.2f} ({retorno_pct:.2f}%)")
+    except Exception as e:
+        print(f"  [!] Error en la máquina del tiempo: {e}")
 
 def comparar_acciones(ticker1: str, ticker2: str, dias: int = 180):
-    pass
+    """Compara el rendimiento porcentual de dos acciones en el tiempo."""
+    try:
+        print(f"\n  Descargando historial para comparar {ticker1} vs {ticker2}...")
+        hist1 = obtener_historial_precios(ticker1, dias)
+        hist2 = obtener_historial_precios(ticker2, dias)
+        
+        if hist1 is None or hist2 is None or hist1.empty or hist2.empty:
+            print("  [!] No hay suficientes datos para graficar la comparación.")
+            return
+
+        norm1 = ((hist1 - hist1.iloc[0]) / hist1.iloc[0]) * 100
+        norm2 = ((hist2 - hist2.iloc[0]) / hist2.iloc[0]) * 100
+
+        plt.figure(figsize=(10, 5))
+        plt.plot(norm1.index, norm1.values, label=ticker1, linewidth=2)
+        plt.plot(norm2.index, norm2.values, label=ticker2, linewidth=2)
+        plt.title(f"Comparación de Rendimiento: {ticker1} vs {ticker2} ({dias} días)")
+        plt.ylabel("Rendimiento Acumulado (%)")
+        plt.xlabel("Fecha")
+        plt.grid(True, alpha=0.3)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig("comparacion_acciones.png", dpi=120)
+        plt.show()
+        print("  [OK] Gráfica de comparación generada y guardada como 'comparacion_acciones.png'.")
+    except Exception as e:
+        print(f"  [!] Error al comparar acciones: {e}")
+
+
+# ============================================================
 # MENÚ PRINCIPAL
 # ============================================================
 
@@ -754,6 +832,9 @@ def mostrar_menu():
     print(" [10] Graficar historial de precios")
     print(" [11] Graficar rentabilidad por acción")
     print(" [12] Guardar portafolio")
+    print(" [13] Consultar finanzas de una empresa (NUEVO)")
+    print(" [14] Máquina del tiempo: Simulacro histórico (NUEVO)")
+    print(" [15] Comparar rendimiento de dos acciones (NUEVO)")
     print("  [0] Salir")
     print("-"*50)
 
@@ -764,7 +845,7 @@ def main():
     Aquí arranca todo: carga o crea el portafolio y muestra el menú.
     """
     print("\n" + "#"*50)
-    print("   SIMULADOR DE PORTAFOLIO DE INVERSIÓN v1.0")
+    print("   SIMULADOR DE PORTAFOLIO DE INVERSIÓN v2.0")
     print("   Universidad — Estructura de Dactos")
     print("#"*50)
 
@@ -881,13 +962,41 @@ def main():
         elif opcion == "12":
             guardar_portafolio(portafolio, capital_inicial)
 
+        elif opcion == "13":
+            ticker = input("\n  Ticker a consultar (ej: MSFT): ").strip().upper()
+            if ticker in ACCIONES_DISPONIBLES:
+                consultar_fundamentales(ticker)
+            else:
+                print("  [!] Ticker no encontrado en la lista disponible.")
+
+        elif opcion == "14":
+            ticker = input("\n  Ticker para la simulación (ej: NVDA): ").strip().upper()
+            if ticker in ACCIONES_DISPONIBLES:
+                try:
+                    monto = float(input("  ¿Cuánto hubieras invertido? ($): "))
+                    anios = int(input("  ¿Hace cuántos años? (ej: 2): "))
+                    maquina_del_tiempo(ticker, monto, anios)
+                except ValueError:
+                    print("  [!] Valores inválidos.")
+            else:
+                print("  [!] Ticker no encontrado en la lista disponible.")
+
+        elif opcion == "15":
+            print("\n  Elige dos tickers para comparar:")
+            t1 = input("  Primer Ticker (ej: AAPL): ").strip().upper()
+            t2 = input("  Segundo Ticker (ej: MSFT): ").strip().upper()
+            if t1 in ACCIONES_DISPONIBLES and t2 in ACCIONES_DISPONIBLES:
+                comparar_acciones(t1, t2, 180) # 180 días por defecto
+            else:
+                print("  [!] Ambos tickers deben estar en la lista disponible.")
+
         elif opcion == "0":
             guardar_portafolio(portafolio, capital_inicial)
             print("\n  ¡Hasta luego! Tu portafolio ha sido guardado.")
             break
 
         else:
-            print("  Opción no válida. Elige un número del 0 al 12.")
+            print("  Opción no válida. Elige un número del 0 al 15.")
 
 
 # Punto de entrada del programa
