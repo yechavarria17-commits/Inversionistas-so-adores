@@ -1,4 +1,4 @@
-# Simulador de Portafolio de Inversión v1.0
+# Simulador de Portafolio de Inversión v2.0
 
 ![Arquitectura del Sistema](diagrama_portafolio.png)
 
