@@ -35,33 +35,33 @@ class Constantes << (C, LightGray) >> {
 }
 
 ' ==================== SERVICIOS DE MERCADO ====================
-class MarketDataService <<service>> {
+class ServicioDatosMercado <<service>> {
     + {static} obtener_precio_accion(ticker: str): dict
     + {static} obtener_historial_precios(ticker: str, dias: int): Series
     + {static} obtener_dividendos(ticker: str, dias: int): float
 }
 
 ' ==================== SERVICIOS DE TRANSACCIONES ====================
-class TransaccionService <<service>> {
+class ServicioTransacciones <<service>> {
     + {static} comprar_accion(portafolio: Portafolio, ticker: str, cantidad: int): bool
     + {static} vender_accion(portafolio: Portafolio, ticker: str, cantidad: int): bool
 }
 
 ' ==================== SERVICIOS DE RENTA FIJA ====================
-class RentaFijaService <<service>> {
+class ServicioRentaFija <<service>> {
     + {static} agregar_cdt(portafolio: Portafolio, monto: float, tasa_anual: float, dias_plazo: int): bool
     + {static} liquidar_intereses_cdts(portafolio: Portafolio): void
     + {static} cobrar_dividendos(portafolio: Portafolio): void
 }
 
 ' ==================== SERVICIOS DE REPORTES ====================
-class ReporteService <<service>> {
+class ServicioReportes <<service>> {
     + {static} calcular_valor_portafolio(portafolio: Portafolio): dict
     + {static} mostrar_resumen(portafolio: Portafolio, capital_inicial: float): dict
 }
 
-' ==================== SERVICIOS DE VISUALIZACION ====================
-class GraficoService <<service>> {
+' ==================== SERVICIOS DE VISUALIZACIÓN ====================
+class ServicioGraficos <<service>> {
     + {static} graficar_evolucion_portafolio(portafolio: Portafolio): void
     + {static} graficar_composicion_portafolio(portafolio: Portafolio): void
     + {static} graficar_precios_acciones(portafolio: Portafolio, dias: int): void
@@ -69,13 +69,13 @@ class GraficoService <<service>> {
 }
 
 ' ==================== SERVICIOS DE PERSISTENCIA ====================
-class PersistenciaService <<service>> {
+class ServicioPersistencia <<service>> {
     + {static} guardar_portafolio(portafolio: Portafolio, capital_inicial: float): void
     + {static} cargar_portafolio(): tuple
 }
 
 ' ==================== CLASE PRINCIPAL ====================
-class Main <<main>> {
+class Principal <<main>> {
     + {static} mostrar_menu(): void
     + {static} main(): void
 }
@@ -116,28 +116,28 @@ Portafolio --> "1" EstructuraAccion : contiene >
 Portafolio --> "*" EstructuraCDT : contiene >
 Portafolio --> "*" EstructuraTransaccion : registra >
 
-TransaccionService ..> Portafolio : opera sobre >
-TransaccionService ..> MarketDataService : utiliza >
+ServicioTransacciones ..> Portafolio : opera sobre >
+ServicioTransacciones ..> ServicioDatosMercado : utiliza >
 
-RentaFijaService ..> Portafolio : opera sobre >
-RentaFijaService ..> MarketDataService : utiliza >
+ServicioRentaFija ..> Portafolio : opera sobre >
+ServicioRentaFija ..> ServicioDatosMercado : utiliza >
 
-ReporteService ..> Portafolio : consulta >
-ReporteService ..> MarketDataService : utiliza >
+ServicioReportes ..> Portafolio : consulta >
+ServicioReportes ..> ServicioDatosMercado : utiliza >
 
-GraficoService ..> Portafolio : visualiza >
-GraficoService ..> ReporteService : utiliza >
-GraficoService ..> MarketDataService : utiliza >
+ServicioGraficos ..> Portafolio : visualiza >
+ServicioGraficos ..> ServicioReportes : utiliza >
+ServicioGraficos ..> ServicioDatosMercado : utiliza >
 
-PersistenciaService ..> Portafolio : guarda/carga >
+ServicioPersistencia ..> Portafolio : guarda/carga >
 
-Main ..> Portafolio : crea/usa >
-Main ..> TransaccionService : usa >
-Main ..> RentaFijaService : usa >
-Main ..> ReporteService : usa >
-Main ..> GraficoService : usa >
-Main ..> PersistenciaService : usa >
-Main ..> Constantes : accede >
+Principal ..> Portafolio : crea/usa >
+Principal ..> ServicioTransacciones : usa >
+Principal ..> ServicioRentaFija : usa >
+Principal ..> ServicioReportes : usa >
+Principal ..> ServicioGraficos : usa >
+Principal ..> ServicioPersistencia : usa >
+Principal ..> Constantes : accede >
 
 note right of Portafolio
     **Clase Principal (Modelo)**
@@ -151,11 +151,11 @@ end note
 note right of MarketDataService
     **Integración Externa**
     Conecta con Yahoo Finance API
-    via yfinance para obtener
+    vía yfinance para obtener
     precios reales del mercado.
 end note
 
-note bottom of TransaccionService
+note bottom of ServicioTransacciones
     **Reglas de Negocio**
     - Valida rango de precios
     - Calcula comisiones 0.1%
@@ -163,13 +163,13 @@ note bottom of TransaccionService
     - Registra en historial
 end note
 
-note bottom of RentaFijaService
+note bottom of ServicioRentaFija
     **Simulación CDT**
     Interés simple diario:
     monto × (tasa_anual / 365)
 end note
 
-note right of GraficoService
+note right of ServicioGraficos
     **Visualización**
     Usa matplotlib para generar
     4 tipos de gráficas:

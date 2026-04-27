@@ -50,41 +50,41 @@ classDiagram
     }
 
     %% ==================== SERVICIOS ====================
-    class MarketDataService {
+    class ServicioDatosMercado {
         +obtener_precio_accion(ticker: str) dict$
         +obtener_historial_precios(ticker: str, dias: int) Series$
         +obtener_dividendos(ticker: str, dias: int) float$
     }
 
-    class TransaccionService {
+    class ServicioTransacciones {
         +comprar_accion(portafolio, ticker, cantidad) bool$
         +vender_accion(portafolio, ticker, cantidad) bool$
     }
 
-    class RentaFijaService {
+    class ServicioRentaFija {
         +agregar_cdt(portafolio, monto, tasa_anual, dias_plazo) bool$
         +liquidar_intereses_cdts(portafolio) void$
         +cobrar_dividendos(portafolio) void$
     }
 
-    class ReporteService {
+    class ServicioReportes {
         +calcular_valor_portafolio(portafolio) dict$
         +mostrar_resumen(portafolio, capital_inicial) dict$
     }
 
-    class GraficoService {
+    class ServicioGraficos {
         +graficar_evolucion_portafolio(portafolio) void$
         +graficar_composicion_portafolio(portafolio) void$
         +graficar_precios_acciones(portafolio, dias) void$
         +graficar_rentabilidad_acciones(portafolio) void$
     }
 
-    class PersistenciaService {
+    class ServicioPersistencia {
         +guardar_portafolio(portafolio, capital_inicial) void$
         +cargar_portafolio() tuple$
     }
 
-    class Main {
+    class Principal {
         +mostrar_menu() void$
         +main() void$
     }
@@ -102,28 +102,28 @@ classDiagram
     Portafolio --> "*" EstructuraCDT : contiene
     Portafolio --> "*" EstructuraTransaccion : registra
 
-    TransaccionService ..> Portafolio : opera sobre
-    TransaccionService ..> MarketDataService : utiliza
+    ServicioTransacciones ..> Portafolio : opera sobre
+    ServicioTransacciones ..> ServicioDatosMercado : utiliza
 
-    RentaFijaService ..> Portafolio : opera sobre
-    RentaFijaService ..> MarketDataService : utiliza
+    ServicioRentaFija ..> Portafolio : opera sobre
+    ServicioRentaFija ..> ServicioDatosMercado : utiliza
 
-    ReporteService ..> Portafolio : consulta
-    ReporteService ..> MarketDataService : utiliza
+    ServicioReportes ..> Portafolio : consulta
+    ServicioReportes ..> ServicioDatosMercado : utiliza
 
-    GraficoService ..> Portafolio : visualiza
-    GraficoService ..> ReporteService : utiliza
-    GraficoService ..> MarketDataService : utiliza
+    ServicioGraficos ..> Portafolio : visualiza
+    ServicioGraficos ..> ServicioReportes : utiliza
+    ServicioGraficos ..> ServicioDatosMercado : utiliza
 
-    PersistenciaService ..> Portafolio : guarda/carga
+    ServicioPersistencia ..> Portafolio : guarda/carga
 
-    Main ..> Portafolio : crea/usa
-    Main ..> TransaccionService : usa
-    Main ..> RentaFijaService : usa
-    Main ..> ReporteService : usa
-    Main ..> GraficoService : usa
-    Main ..> PersistenciaService : usa
-    Main ..> Constantes : accede
+    Principal ..> Portafolio : crea/usa
+    Principal ..> ServicioTransacciones : usa
+    Principal ..> ServicioRentaFija : usa
+    Principal ..> ServicioReportes : usa
+    Principal ..> ServicioGraficos : usa
+    Principal ..> ServicioPersistencia : usa
+    Principal ..> Constantes : accede
 ```
 
 ---
@@ -185,35 +185,35 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     actor Usuario
-    participant Main
-    participant TransaccionService
-    participant MarketDataService
+    participant Principal
+    participant ServicioTransacciones
+    participant ServicioDatosMercado
     participant YahooFinance
     participant Portafolio
 
-    Usuario->>Main: Seleccionar "Comprar Acciones"
-    Main->>Usuario: Solicitar ticker y cantidad
-    Usuario->>Main: ticker="NVDA", cantidad=20
+    Usuario->>Principal: Seleccionar "Comprar Acciones"
+    Principal->>Usuario: Solicitar ticker y cantidad
+    Usuario->>Principal: ticker="NVDA", cantidad=20
 
-    Main->>TransaccionService: comprar_accion(portafolio, "NVDA", 20)
+    Principal->>ServicioTransacciones: comprar_accion(portafolio, "NVDA", 20)
 
-    TransaccionService->>MarketDataService: obtener_precio_accion("NVDA")
-    MarketDataService->>YahooFinance: API Request
-    YahooFinance-->>MarketDataService: precio=201.68
-    MarketDataService-->>TransaccionService: datos mercado
+    ServicioTransacciones->>ServicioDatosMercado: obtener_precio_accion("NVDA")
+    ServicioDatosMercado->>YahooFinance: Petición API
+    YahooFinance-->>ServicioDatosMercado: precio=201.68
+    ServicioDatosMercado-->>ServicioTransacciones: datos mercado
 
-    TransaccionService->>TransaccionService: Validar rango precio
-    TransaccionService->>TransaccionService: Calcular comisión (0.1%)
-    TransaccionService->>Portafolio: Verificar capital >= costo_total
-    Portafolio-->>TransaccionService: OK
+    ServicioTransacciones->>ServicioTransacciones: Validar rango precio
+    ServicioTransacciones->>ServicioTransacciones: Calcular comisión (0.1%)
+    ServicioTransacciones->>Portafolio: Verificar capital >= costo_total
+    Portafolio-->>ServicioTransacciones: OK
 
-    TransaccionService->>Portafolio: capital -= costo_total
-    TransaccionService->>Portafolio: comisiones_pagadas += comision
-    TransaccionService->>Portafolio: Actualizar/Agregar acciones
-    TransaccionService->>Portafolio: Registrar transacción
+    ServicioTransacciones->>Portafolio: capital -= costo_total
+    ServicioTransacciones->>Portafolio: comisiones_pagadas += comision
+    ServicioTransacciones->>Portafolio: Actualizar/Agregar acciones
+    ServicioTransacciones->>Portafolio: Registrar transacción
 
-    TransaccionService-->>Main: True (éxito)
-    Main-->>Usuario: Confirmación compra
+    ServicioTransacciones-->>Principal: True (éxito)
+    Principal-->>Usuario: Confirmación compra
 ```
 
 ---
@@ -270,24 +270,4 @@ erDiagram
         datetime fecha
         float valor_total
     }
-```
-
----
-
-## Cómo Visualizar
-
-### Opción 1: PlantUML (Recomendado)
-Usar la extensión PlantUML en VS Code o el servidor online:
-- Archivo: `diagrama_uml.puml`
-- URL: https://www.plantuml.com/plantuml
-
-### Opción 2: Mermaid
-- Archivo: `diagrama_uml.md`
-- GitHub lo renderiza automáticamente
-- Extensión Mermaid Preview en VS Code
-
-### Opción 3: Generar PNG
-```bash
-# Instalar PlantUML (requiere Java)
-java -jar plantuml.jar diagrama_uml.puml
 ```
