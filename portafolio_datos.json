@@ -1,5 +1,5 @@
 {
-  "capital": 2249.1306999999997,
+  "capital": 2066.0251999999996,
   "acciones": {
     "NVDA": {
       "cantidad": 12,
@@ -16,6 +16,10 @@
     "AAPL": {
       "cantidad": 1,
       "precio_promedio": 267.61
+    },
+    "NFLX": {
+      "cantidad": 2,
+      "precio_promedio": 91.37
     }
   },
   "cdts": [],
@@ -81,6 +85,16 @@
       "total": 1080.8839000000003,
       "fecha": "2026-04-28 02:09",
       "capital_restante": 2249.13
+    },
+    {
+      "tipo": "COMPRA",
+      "ticker": "NFLX",
+      "cantidad": 2,
+      "precio": 91.37,
+      "comision": 0.3655,
+      "total": 183.1055,
+      "fecha": "2026-04-27 21:41",
+      "capital_restante": 2066.03
     }
   ],
   "historial_valor": [
@@ -115,9 +129,13 @@
     {
       "fecha": "2026-04-28 02:09",
       "valor": 10304.12
+    },
+    {
+      "fecha": "2026-04-27 21:41",
+      "valor": 10303.76
     }
   ],
   "dividendos_recibidos": 0.184,
-  "comisiones_pagadas": 18.3633,
+  "comisiones_pagadas": 18.7288,
   "capital_inicial": 1168.2467999999994
 }
