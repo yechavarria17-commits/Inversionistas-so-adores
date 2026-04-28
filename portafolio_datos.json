@@ -1,8 +1,8 @@
 {
-  "capital": 1168.2467999999994,
+  "capital": 2249.1306999999997,
   "acciones": {
     "NVDA": {
-      "cantidad": 17,
+      "cantidad": 12,
       "precio_promedio": 201.68
     },
     "TSLA": {
@@ -70,6 +70,17 @@
       "total": 648.5303,
       "fecha": "2026-04-28 00:15",
       "capital_restante": 1168.25
+    },
+    {
+      "tipo": "VENTA",
+      "ticker": "NVDA",
+      "cantidad": 5,
+      "precio": 216.61,
+      "ganancia": 72.4839,
+      "comision": 2.1661,
+      "total": 1080.8839000000003,
+      "fecha": "2026-04-28 02:09",
+      "capital_restante": 2249.13
     }
   ],
   "historial_valor": [
@@ -100,8 +111,13 @@
     {
       "fecha": "2026-04-28 00:15",
       "valor": 10306.29
+    },
+    {
+      "fecha": "2026-04-28 02:09",
+      "valor": 10304.12
     }
   ],
   "dividendos_recibidos": 0.184,
-  "comisiones_pagadas": 16.1972
+  "comisiones_pagadas": 18.3633,
+  "capital_inicial": 1168.2467999999994
 }
