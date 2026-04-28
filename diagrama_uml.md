@@ -54,6 +54,7 @@ classDiagram
         +obtener_precio_accion(ticker: str) dict$
         +obtener_historial_precios(ticker: str, dias: int) Series$
         +obtener_dividendos(ticker: str, dias: int) float$
+        +consultar_fundamentales(ticker: str) dict$
     }
 
     class ServicioTransacciones {
@@ -87,6 +88,25 @@ classDiagram
     class Principal {
         +mostrar_menu() void$
         +main() void$
+    }
+
+    %% ==================== SERVICIOS WEB (app.py) ====================
+    class ServidorWebAPI {
+        <<service>>
+        +app: Flask
+        +api_acciones() list
+        +api_portafolio() dict
+        +api_crear() json
+        +api_comprar() json
+        +api_vender() json
+        +api_cerrar_dia() json
+        +api_maquina() json
+    }
+
+    class InterfazWeb {
+        <<UI>>
+        +index.html
+        +javascript_frontend
     }
 
     %% ==================== CONSTANTES ====================

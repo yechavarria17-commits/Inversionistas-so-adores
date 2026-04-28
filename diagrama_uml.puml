@@ -39,6 +39,7 @@ class ServicioDatosMercado <<service>> {
     + {static} obtener_precio_accion(ticker: str): dict
     + {static} obtener_historial_precios(ticker: str, dias: int): Series
     + {static} obtener_dividendos(ticker: str, dias: int): float
+    + {static} consultar_fundamentales(ticker: str): dict
 }
 
 ' ==================== SERVICIOS DE TRANSACCIONES ====================
@@ -58,6 +59,7 @@ class ServicioRentaFija <<service>> {
 class ServicioReportes <<service>> {
     + {static} calcular_valor_portafolio(portafolio: Portafolio): dict
     + {static} mostrar_resumen(portafolio: Portafolio, capital_inicial: float): dict
+    + {static} maquina_del_tiempo(ticker: str, inversion: float, anios: int): void
 }
 
 ' ==================== SERVICIOS DE VISUALIZACIÓN ====================
@@ -78,6 +80,23 @@ class ServicioPersistencia <<service>> {
 class Principal <<main>> {
     + {static} mostrar_menu(): void
     + {static} main(): void
+}
+
+' ==================== SERVICIOS WEB (app.py) ====================
+class ServidorWebAPI <<service>> {
+    + app: Flask
+    + api_acciones(): list
+    + api_portafolio(): dict
+    + api_crear(): json
+    + api_comprar(): json
+    + api_vender(): json
+    + api_cerrar_dia(): json
+    + api_maquina(): json
+}
+
+class InterfazWeb << (U, LightPink) >> {
+    + index.html (UI Dashboard)
+    + javascript_frontend
 }
 
 ' ==================== ESTRUCTURAS DE DATOS INTERNAS ====================
@@ -139,6 +158,13 @@ Principal ..> ServicioGraficos : usa >
 Principal ..> ServicioPersistencia : usa >
 Principal ..> Constantes : accede >
 
+ServidorWebAPI ..> Portafolio : carga/guarda >
+ServidorWebAPI ..> ServicioTransacciones : envuelve >
+ServidorWebAPI ..> ServicioRentaFija : envuelve >
+ServidorWebAPI ..> ServicioDatosMercado : consulta >
+
+InterfazWeb --> ServidorWebAPI : consume API REST >
+
 note right of Portafolio
     **Clase Principal (Modelo)**
     Contiene toda la información
@@ -148,7 +174,7 @@ note right of Portafolio
     históricos (inserción O(1))
 end note
 
-note right of MarketDataService
+note right of ServicioDatosMercado
     **Integración Externa**
     Conecta con Yahoo Finance API
     vía yfinance para obtener
