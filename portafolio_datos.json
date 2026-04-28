@@ -1,12 +1,12 @@
 {
-  "capital": 1808.2576999999994,
+  "capital": 3309.3294999999994,
   "acciones": {
     "NVDA": {
       "cantidad": 6,
       "precio_promedio": 201.68
     },
     "TSLA": {
-      "cantidad": 10,
+      "cantidad": 6,
       "precio_promedio": 376.3
     },
     "GOOGL": {
@@ -171,6 +171,17 @@
       "total": 1297.0607,
       "fecha": "2026-04-27 22:06",
       "capital_restante": 1577.38
+    },
+    {
+      "tipo": "VENTA",
+      "ticker": "TSLA",
+      "cantidad": 4,
+      "precio": 376.02,
+      "ganancia": -4.1282,
+      "comision": 3.0082,
+      "total": 1501.0718,
+      "fecha": "2026-04-28 16:58",
+      "capital_restante": 3309.33
     }
   ],
   "historial_valor": [
@@ -245,9 +256,13 @@
     {
       "fecha": "2026-04-27 22:08",
       "valor": 10535.98
+    },
+    {
+      "fecha": "2026-04-28 16:58",
+      "valor": 10477.69
     }
   ],
   "dividendos_recibidos": 7.774,
-  "comisiones_pagadas": 23.504099999999998,
+  "comisiones_pagadas": 26.512299999999996,
   "capital_inicial": 1368.2699999999995
 }
