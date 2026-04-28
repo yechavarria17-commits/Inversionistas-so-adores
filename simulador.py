@@ -27,6 +27,7 @@ import pandas as pd             # Para manejar tablas de datos
 import matplotlib.pyplot as plt # Para hacer gráficas
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
+import pytz
 import json                     # Para guardar y cargar datos
 import os                       # Para verificar si existen archivos
 
@@ -167,7 +168,8 @@ def obtener_dividendos(ticker: str, dias: int = 90):
         if dividendos.empty:
             return 0.0
         # Filtrar dividendos de los últimos 'dias' días
-        fecha_inicio = datetime.now() - timedelta(days=dias)
+        colombia_tz = pytz.timezone('America/Bogota')
+        fecha_inicio = datetime.now(colombia_tz).replace(tzinfo=None) - timedelta(days=dias)
         dividendos_recientes = dividendos[dividendos.index > pd.Timestamp(fecha_inicio, tz='America/New_York')]
         return round(float(dividendos_recientes.sum()), 4)
     except:
@@ -247,7 +249,7 @@ def comprar_accion(portafolio: Portafolio, ticker: str, cantidad: int):
         "precio":    precio_cierre,
         "comision":  comision,
         "total":     costo_total,
-        "fecha":     datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "fecha":     datetime.now(pytz.timezone('America/Bogota')).strftime("%Y-%m-%d %H:%M"),
         "capital_restante": round(portafolio.capital, 2)
     })
 
@@ -324,7 +326,7 @@ def vender_accion(portafolio: Portafolio, ticker: str, cantidad: int):
         "ganancia":  ganancia,
         "comision":  comision,
         "total":     ingreso_neto,
-        "fecha":     datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "fecha":     datetime.now(pytz.timezone('America/Bogota')).strftime("%Y-%m-%d %H:%M"),
         "capital_restante": round(portafolio.capital, 2)
     })
 
@@ -355,8 +357,10 @@ def agregar_cdt(portafolio: Portafolio, monto: float, tasa_anual: float, dias_pl
     # Descontar el monto del capital disponible
     portafolio.capital -= monto
 
-    fecha_inicio = datetime.now().strftime("%Y-%m-%d")
-    fecha_vencimiento = (datetime.now() + timedelta(days=dias_plazo)).strftime("%Y-%m-%d")
+    colombia_tz = pytz.timezone('America/Bogota')
+    ahora = datetime.now(colombia_tz)
+    fecha_inicio = ahora.strftime("%Y-%m-%d")
+    fecha_vencimiento = (ahora + timedelta(days=dias_plazo)).strftime("%Y-%m-%d")
     interes_diario = round(monto * (tasa_anual / 360), 4)
 
     cdt = {
@@ -531,7 +535,7 @@ def mostrar_resumen(portafolio: Portafolio, capital_inicial: float):
 
     # Registrar el valor del portafolio en el historial
     portafolio.historial_valor.append({
-        "fecha":       datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "fecha":       datetime.now(pytz.timezone('America/Bogota')).strftime("%Y-%m-%d %H:%M"),
         "valor_total": valoracion["valor_total"]
     })
 
@@ -754,8 +758,9 @@ def maquina_del_tiempo(ticker: str, inversion: float, anios: int):
     """Simula qué hubiera pasado si invertías hace X años."""
     try:
         print(f"\n  Viajando en el tiempo {anios} años para {ticker}...")
+        colombia_tz = pytz.timezone('America/Bogota')
         accion = yf.Ticker(ticker)
-        fecha_pasado = datetime.now() - timedelta(days=anios*365)
+        fecha_pasado = datetime.now(colombia_tz).replace(tzinfo=None) - timedelta(days=anios*365)
         historial = accion.history(start=fecha_pasado - timedelta(days=5), end=fecha_pasado + timedelta(days=5))
         
         if historial.empty:

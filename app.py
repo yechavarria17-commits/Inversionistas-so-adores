@@ -6,6 +6,7 @@ Expone el simulador como una API REST para la interfaz web.
 from flask import Flask, jsonify, request, send_from_directory
 import json, os
 from datetime import datetime, timedelta
+import pytz
 from simulador import (
     Portafolio, ACCIONES_DISPONIBLES, ARCHIVO_DATOS,
     obtener_precio_accion, obtener_historial_precios,
@@ -72,8 +73,9 @@ def crear_portafolio():
     data = request.json
     capital = float(data.get('capital', 10000))
     p = Portafolio(capital)
+    colombia_tz = pytz.timezone('America/Bogota')
     p.historial_valor.append({
-        'fecha': datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'fecha': datetime.now(colombia_tz).strftime('%Y-%m-%d %H:%M'),
         'valor': capital
     })
     guardar(p)
@@ -172,8 +174,9 @@ def api_maquina():
     anios = int(data['anios'])
     
     try:
+        colombia_tz = pytz.timezone('America/Bogota')
         accion = yf.Ticker(ticker)
-        fecha_pasado = datetime.now() - timedelta(days=anios*365)
+        fecha_pasado = datetime.now(colombia_tz).replace(tzinfo=None) - timedelta(days=anios*365)
         historial = accion.history(start=fecha_pasado - timedelta(days=5), end=fecha_pasado + timedelta(days=5))
         
         if historial.empty:
@@ -252,8 +255,9 @@ def api_exportar_excel():
 
 def _registrar_valor(p: Portafolio):
     val = calcular_valor_portafolio(p)
+    colombia_tz = pytz.timezone('America/Bogota')
     p.historial_valor.append({
-        'fecha': datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'fecha': datetime.now(colombia_tz).strftime('%Y-%m-%d %H:%M'),
         'valor': val['valor_total']
     })
 
