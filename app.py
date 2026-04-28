@@ -13,6 +13,9 @@ from simulador import (
     agregar_cdt, liquidar_intereses_cdts, cobrar_dividendos,
     calcular_valor_portafolio
 )
+import yfinance as yf
+import pandas as pd
+
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 
@@ -147,6 +150,52 @@ def api_cerrar_dia():
     _registrar_valor(p)
     guardar(p)
     return jsonify({'ok': True})
+
+@app.route('/api/maquina', methods=['POST'])
+def api_maquina():
+    data = request.json
+    ticker = data['ticker'].upper()
+    inversion = float(data['inversion'])
+    anios = int(data['anios'])
+    
+    try:
+        accion = yf.Ticker(ticker)
+        fecha_pasado = datetime.now() - timedelta(days=anios*365)
+        historial = accion.history(start=fecha_pasado - timedelta(days=5), end=fecha_pasado + timedelta(days=5))
+        
+        if historial.empty:
+            return jsonify({'error': 'No hay datos históricos para esa fecha.'}), 400
+        
+        precio_pasado = float(historial.iloc[0]["Close"])
+        cantidad = inversion / precio_pasado
+        
+        precio_actual_dict = obtener_precio_accion(ticker)
+        if not precio_actual_dict: 
+            return jsonify({'error': 'Error obteniendo precio actual.'}), 400
+        precio_actual = precio_actual_dict["cierre"]
+        
+        divs = accion.dividends
+        divs_periodo = divs[divs.index > pd.Timestamp(fecha_pasado, tz='America/New_York')] if not divs.empty else pd.Series(dtype=float)
+        total_dividendos_por_accion = float(divs_periodo.sum()) if not divs_periodo.empty else 0.0
+        dividendos_ganados = total_dividendos_por_accion * cantidad
+        
+        valor_actual = cantidad * precio_actual
+        ganancia_total = (valor_actual + dividendos_ganados) - inversion
+        retorno_pct = (ganancia_total / inversion) * 100
+        
+        return jsonify({
+            'ok': True,
+            'ticker': ticker,
+            'precio_pasado': precio_pasado,
+            'cantidad': cantidad,
+            'precio_actual': precio_actual,
+            'valor_actual': valor_actual,
+            'dividendos_ganados': dividendos_ganados,
+            'ganancia_total': ganancia_total,
+            'retorno_pct': retorno_pct
+        })
+    except Exception as e:
+        return jsonify({'error': f'Error en máquina del tiempo: {str(e)}'}), 400
 
 def _registrar_valor(p: Portafolio):
     val = calcular_valor_portafolio(p)
