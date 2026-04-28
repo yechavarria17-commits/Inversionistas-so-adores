@@ -1,13 +1,21 @@
 {
-  "capital": 2192.0243999999993,
+  "capital": 1168.2467999999994,
   "acciones": {
     "NVDA": {
-      "cantidad": 20,
+      "cantidad": 17,
       "precio_promedio": 201.68
     },
     "TSLA": {
       "cantidad": 10,
       "precio_promedio": 376.3
+    },
+    "GOOGL": {
+      "cantidad": 4,
+      "precio_promedio": 350.34
+    },
+    "AAPL": {
+      "cantidad": 1,
+      "precio_promedio": 267.61
     }
   },
   "cdts": [],
@@ -31,6 +39,37 @@
       "total": 3770.526,
       "fecha": "2026-04-26 23:16",
       "capital_restante": 2191.84
+    },
+    {
+      "tipo": "COMPRA",
+      "ticker": "GOOGL",
+      "cantidad": 4,
+      "precio": 350.34,
+      "comision": 2.8027,
+      "total": 1404.1626999999999,
+      "fecha": "2026-04-28 00:14",
+      "capital_restante": 787.86
+    },
+    {
+      "tipo": "COMPRA",
+      "ticker": "AAPL",
+      "cantidad": 1,
+      "precio": 267.61,
+      "comision": 0.5352,
+      "total": 268.1452,
+      "fecha": "2026-04-28 00:15",
+      "capital_restante": 519.72
+    },
+    {
+      "tipo": "VENTA",
+      "ticker": "NVDA",
+      "cantidad": 3,
+      "precio": 216.61,
+      "ganancia": 43.4903,
+      "comision": 1.2997,
+      "total": 648.5303,
+      "fecha": "2026-04-28 00:15",
+      "capital_restante": 1168.25
     }
   ],
   "historial_valor": [
@@ -49,8 +88,20 @@
     {
       "fecha": "2026-04-26 23:17",
       "valor_total": 10120.42
+    },
+    {
+      "fecha": "2026-04-28 00:14",
+      "valor": 10308.12
+    },
+    {
+      "fecha": "2026-04-28 00:15",
+      "valor": 10307.59
+    },
+    {
+      "fecha": "2026-04-28 00:15",
+      "valor": 10306.29
     }
   ],
   "dividendos_recibidos": 0.184,
-  "comisiones_pagadas": 11.5596
+  "comisiones_pagadas": 16.1972
 }
