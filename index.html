@@ -7,18 +7,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {
-    --green:       #00ff88;
-    --green-dim:   #00cc6a;
-    --green-dark:  #004d28;
-    --green-glow:  rgba(0,255,136,0.15);
-    --bg:          #0a0a0a;
-    --card:        #111111;
-    --card2:       #161616;
-    --border:      #1f1f1f;
-    --text:        #e0e0e0;
-    --text-muted:  #666;
-    --red:         #ff4d4d;
-    --yellow:      #ffd700;
+    --green:       #b5f23d; /* lime */
+    --green-dim:   #9de02a; /* lime2 */
+    --green-dark:  #1a1a2e; /* ink */
+    --green-glow:  rgba(181,242,61,0.15);
+    --bg:          #fafaf8; /* paper */
+    --card:        #ffffff; /* white */
+    --card2:       #f3f4f6;
+    --border:      #e5e7eb; /* faint */
+    --text:        #1a1a2e; /* ink */
+    --text-muted:  #6b7280; /* muted */
+    --red:         #ff6b6b; /* coral */
+    --yellow:      #fbbf24; /* amber */
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,8 +32,8 @@
 
   /* ── HEADER ── */
   header {
-    background: #0d0d0d;
-    border-bottom: 1px solid var(--green-dark);
+    background: #ffffff;
+    border-bottom: 2px solid var(--green-dark);
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
@@ -132,8 +132,8 @@
   .form-group label { display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; }
   .form-group input, .form-group select {
     width: 100%;
-    background: #0d0d0d;
-    border: 1px solid var(--border);
+    background: #fafaf8;
+    border: 1.5px solid var(--border);
     border-radius: 7px;
     padding: 0.5rem 0.75rem;
     color: var(--text);
@@ -142,7 +142,7 @@
     transition: border-color 0.2s;
   }
   .form-group input:focus, .form-group select:focus { border-color: var(--green-dark); }
-  .form-group select option { background: #111; }
+  .form-group select option { background: #ffffff; }
 
   /* ── TABS ── */
   .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
@@ -165,15 +165,15 @@
 
   /* ── TABLE ── */
   table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  th { padding: 0.6rem; text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
-  td { padding: 0.6rem; border-bottom: 1px solid #161616; vertical-align: middle; }
-  tr:hover td { background: #141414; }
+  th { padding: 0.6rem; text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
+  td { padding: 0.6rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:hover td { background: #f9fafb; }
 
-  .pos  { color: var(--green); font-weight: 600; }
+  .pos  { color: #16a34a; font-weight: 600; }
   .neg  { color: var(--red);   font-weight: 600; }
-  .tag-buy  { background: #002a14; color: var(--green); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; }
-  .tag-sell { background: #2a0000; color: var(--red);   padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; }
-  .tag-cdt  { background: #1a1400; color: var(--yellow); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; }
+  .tag-buy  { background: rgba(22,163,74,0.1); color: #16a34a; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; }
+  .tag-sell { background: rgba(255,107,107,0.1); color: var(--red);   padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; }
+  .tag-cdt  { background: rgba(96,165,250,0.12); color: var(--yellow); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; }
 
   /* ── CHARTS ── */
   .chart-wrap { position: relative; height: 260px; }
