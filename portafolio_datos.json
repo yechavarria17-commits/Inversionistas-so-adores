@@ -1,5 +1,5 @@
 {
-  "capital": 2066.0251999999996,
+  "capital": 960.2959999999995,
   "acciones": {
     "NVDA": {
       "cantidad": 12,
@@ -20,9 +20,26 @@
     "NFLX": {
       "cantidad": 2,
       "precio_promedio": 91.37
+    },
+    "DIS": {
+      "cantidad": 4,
+      "precio_promedio": 102.35
     }
   },
-  "cdts": [],
+  "cdts": [
+    {
+      "id": 1,
+      "monto_inicial": 700.0,
+      "tasa_anual": 0.14,
+      "dias_plazo": 180,
+      "fecha_inicio": "2026-04-27",
+      "fecha_vencimiento": "2026-10-24",
+      "interes_diario": 0.2722,
+      "intereses_acumulados": 1.0888,
+      "dias_transcurridos": 4,
+      "activo": true
+    }
+  ],
   "historial_transacciones": [
     {
       "tipo": "COMPRA",
@@ -95,6 +112,16 @@
       "total": 183.1055,
       "fecha": "2026-04-27 21:41",
       "capital_restante": 2066.03
+    },
+    {
+      "tipo": "COMPRA",
+      "ticker": "DIS",
+      "cantidad": 4,
+      "precio": 102.35,
+      "comision": 0.8188,
+      "total": 410.2188,
+      "fecha": "2026-04-27 21:53",
+      "capital_restante": 959.17
     }
   ],
   "historial_valor": [
@@ -133,9 +160,29 @@
     {
       "fecha": "2026-04-27 21:41",
       "valor": 10303.76
+    },
+    {
+      "fecha": "2026-04-27 21:52",
+      "valor": 10305.15
+    },
+    {
+      "fecha": "2026-04-27 21:52",
+      "valor": 10306.54
+    },
+    {
+      "fecha": "2026-04-27 21:53",
+      "valor": 10307.94
+    },
+    {
+      "fecha": "2026-04-27 21:53",
+      "valor": 10307.12
+    },
+    {
+      "fecha": "2026-04-27 21:56",
+      "valor": 10308.51
     }
   ],
-  "dividendos_recibidos": 0.184,
-  "comisiones_pagadas": 18.7288,
-  "capital_inicial": 1168.2467999999994
+  "dividendos_recibidos": 4.6735999999999995,
+  "comisiones_pagadas": 19.5476,
+  "capital_inicial": 1368.2699999999995
 }
