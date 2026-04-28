@@ -15,6 +15,8 @@ from simulador import (
 )
 import yfinance as yf
 import pandas as pd
+from io import BytesIO
+from flask import send_file
 
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
@@ -207,6 +209,46 @@ def api_maquina():
         })
     except Exception as e:
         return jsonify({'error': f'Error en máquina del tiempo: {str(e)}'}), 400
+
+@app.route('/api/exportar-excel', methods=['GET'])
+def api_exportar_excel():
+    p = cargar()
+    if not p:
+        return "Crea un portafolio primero", 404
+        
+    val = calcular_valor_portafolio(p)
+    
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        resumen_df = pd.DataFrame([{
+            'Capital en Caja': p.capital,
+            'Valor en Acciones': val['valor_acciones'],
+            'Valor en CDTs': val['valor_cdts'],
+            'Valor Total': val['valor_total'],
+            'Dividendos Recibidos': p.dividendos_recibidos,
+            'Comisiones Pagadas': p.comisiones_pagadas
+        }])
+        resumen_df.to_excel(writer, sheet_name='Resumen_Portafolio', index=False)
+        
+        if val['detalle_acciones']:
+            acc_df = pd.DataFrame(val['detalle_acciones'])
+            acc_df.to_excel(writer, sheet_name='Posiciones_Acciones', index=False)
+            
+        if p.cdts:
+            cdts_df = pd.DataFrame(p.cdts)
+            cdts_df.to_excel(writer, sheet_name='CDTs_Activos', index=False)
+            
+        if p.historial_transacciones:
+            hist_df = pd.DataFrame(p.historial_transacciones)
+            hist_df.to_excel(writer, sheet_name='Historial_Transacciones', index=False)
+            
+    output.seek(0)
+    return send_file(
+        output,
+        download_name='Portafolio_Export.xlsx',
+        as_attachment=True,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 def _registrar_valor(p: Portafolio):
     val = calcular_valor_portafolio(p)

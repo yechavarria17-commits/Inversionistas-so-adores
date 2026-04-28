@@ -1,6 +1,74 @@
 # Simulador de Portafolio de Inversión v2.0
 
-![Arquitectura del Sistema](diagrama_portafolio.png)
+## Arquitectura del Sistema (UML)
+
+```mermaid
+classDiagram
+    class Portafolio {
+        +float capital
+        +dict acciones
+        +list cdts
+        +list historial_transacciones
+        +list historial_valor
+        +float dividendos_recibidos
+        +float comisiones_pagadas
+        +__init__(capital_inicial: float)
+        +to_dict() dict
+        +from_dict(datos: dict) Portafolio$
+    }
+
+    class ServicioDatosMercado {
+        +obtener_precio_accion(ticker: str) dict$
+        +obtener_historial_precios(ticker: str, dias: int) Series$
+        +obtener_dividendos(ticker: str, dias: int) float$
+        +consultar_fundamentales(ticker: str) dict$
+    }
+
+    class ServicioTransacciones {
+        +comprar_accion(portafolio, ticker, cantidad) bool$
+        +vender_accion(portafolio, ticker, cantidad) bool$
+    }
+
+    class ServicioRentaFija {
+        +agregar_cdt(portafolio, monto, tasa, dias) bool$
+        +liquidar_intereses_cdts(portafolio) void$
+        +cobrar_dividendos(portafolio) void$
+    }
+
+    class ServicioReportes {
+        +calcular_valor_portafolio(portafolio) dict$
+        +mostrar_resumen(portafolio, capital_inicial) dict$
+        +maquina_del_tiempo(ticker, inversion, anios) void$
+    }
+
+    class Principal {
+        +mostrar_menu() void$
+        +main() void$
+    }
+
+    class ServidorWebAPI {
+        <<service>>
+        +app: Flask
+        +api_acciones() list
+        +api_portafolio() dict
+        +api_maquina() json
+        +api_exportar_excel() file
+    }
+
+    class InterfazWeb {
+        <<UI>>
+        +index.html
+    }
+
+    Portafolio <-- ServicioTransacciones : opera
+    Portafolio <-- ServicioRentaFija : opera
+    Portafolio <-- ServicioReportes : consulta
+    ServicioTransacciones ..> ServicioDatosMercado : usa
+    Principal ..> Portafolio : usa
+    ServidorWebAPI ..> Portafolio : manipula
+    ServidorWebAPI ..> ServicioTransacciones : envuelve
+    InterfazWeb --> ServidorWebAPI : llamadas REST
+```
 
 ### **Universidad — Materia: Estructura de Datos / Finanzas Computacionales**
 

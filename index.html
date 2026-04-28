@@ -351,6 +351,9 @@
         <button class="btn btn-outline" onclick="refreshData()" style="width:100%; justify-content:center;">
           Refrescar Todo
         </button>
+        <button class="btn btn-outline" onclick="exportarExcel()" style="width:100%; justify-content:center; background:#16a34a; color:#fff; border:none; margin-top:0.5rem;">
+          📊 Exportar a Excel
+        </button>
       </div>
     </div>
   </div>
@@ -1083,6 +1086,16 @@ async function guardarCapital() {
 document.getElementById('modalCapital').addEventListener('click', function(e) {
   if (e.target === this) cerrarModalCapital();
 });
+
+// ─── Exportar a Excel ────────────────────────────────────────────────────────
+function exportarExcel() {
+  if (!portafolioData) {
+    toast('No hay portafolio para exportar', 'err');
+    return;
+  }
+  toast('Generando Excel con múltiples hojas...', 'ok');
+  window.location.href = '/api/exportar-excel';
+}
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 init();
