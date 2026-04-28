@@ -22,8 +22,19 @@ app = Flask(__name__, static_folder='static', static_url_path='/static')
 # ─── Persistencia ────────────────────────────────────────────────────────────
 
 def guardar(p: Portafolio):
+    capital_ini = p.capital
+    if os.path.exists(ARCHIVO_DATOS):
+        try:
+            with open(ARCHIVO_DATOS) as f:
+                viejo = json.load(f)
+            capital_ini = viejo.get("capital_inicial", p.capital)
+        except:
+            pass
+            
+    datos = p.to_dict()
+    datos["capital_inicial"] = capital_ini
     with open(ARCHIVO_DATOS, 'w') as f:
-        json.dump(p.to_dict(), f, indent=2)
+        json.dump(datos, f, indent=2)
 
 def cargar() -> Portafolio:
     if os.path.exists(ARCHIVO_DATOS):

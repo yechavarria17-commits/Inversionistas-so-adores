@@ -716,8 +716,15 @@ def cargar_portafolio():
     try:
         with open(ARCHIVO_DATOS, "r", encoding="utf-8") as f:
             datos = json.load(f)
-        capital_inicial = datos.pop("capital_inicial")
+        
+        # El Frontend Web no guarda 'capital_inicial', así que usamos pop seguro
+        capital_inicial = datos.pop("capital_inicial", None)
         portafolio = Portafolio.from_dict(datos)
+        
+        # Si venía de la web y no tenía capital_inicial, asumimos el capital actual (o el sumatorio)
+        if capital_inicial is None:
+            capital_inicial = portafolio.capital
+            
         return portafolio, capital_inicial
     except Exception as e:
         print(f"  [!] Error cargando portafolio: {e}")
