@@ -1,8 +1,8 @@
 {
-  "capital": 960.2959999999995,
+  "capital": 1808.2576999999994,
   "acciones": {
     "NVDA": {
-      "cantidad": 12,
+      "cantidad": 6,
       "precio_promedio": 201.68
     },
     "TSLA": {
@@ -24,6 +24,10 @@
     "DIS": {
       "cantidad": 4,
       "precio_promedio": 102.35
+    },
+    "META": {
+      "cantidad": 1,
+      "precio_promedio": 678.62
     }
   },
   "cdts": [
@@ -35,9 +39,33 @@
       "fecha_inicio": "2026-04-27",
       "fecha_vencimiento": "2026-10-24",
       "interes_diario": 0.2722,
-      "intereses_acumulados": 1.0888,
-      "dias_transcurridos": 4,
+      "intereses_acumulados": 1.6332,
+      "dias_transcurridos": 6,
       "activo": true
+    },
+    {
+      "id": 2,
+      "monto_inicial": 1000.0,
+      "tasa_anual": 2.0,
+      "dias_plazo": 1,
+      "fecha_inicio": "2026-04-27",
+      "fecha_vencimiento": "2026-04-28",
+      "interes_diario": 5.5556,
+      "intereses_acumulados": 5.5556,
+      "dias_transcurridos": 1,
+      "activo": false
+    },
+    {
+      "id": 3,
+      "monto_inicial": 1000.0,
+      "tasa_anual": 80.0,
+      "dias_plazo": 1,
+      "fecha_inicio": "2026-04-27",
+      "fecha_vencimiento": "2026-04-28",
+      "interes_diario": 222.2222,
+      "intereses_acumulados": 222.2222,
+      "dias_transcurridos": 1,
+      "activo": false
     }
   ],
   "historial_transacciones": [
@@ -122,6 +150,27 @@
       "total": 410.2188,
       "fecha": "2026-04-27 21:53",
       "capital_restante": 959.17
+    },
+    {
+      "tipo": "COMPRA",
+      "ticker": "META",
+      "cantidad": 1,
+      "precio": 678.62,
+      "comision": 1.3572,
+      "total": 679.9772,
+      "fecha": "2026-04-27 22:05",
+      "capital_restante": 280.32
+    },
+    {
+      "tipo": "VENTA",
+      "ticker": "NVDA",
+      "cantidad": 6,
+      "precio": 216.61,
+      "ganancia": 86.9807,
+      "comision": 2.5993,
+      "total": 1297.0607,
+      "fecha": "2026-04-27 22:06",
+      "capital_restante": 1577.38
     }
   ],
   "historial_valor": [
@@ -180,9 +229,25 @@
     {
       "fecha": "2026-04-27 21:56",
       "valor": 10308.51
+    },
+    {
+      "fecha": "2026-04-27 22:05",
+      "valor": 10307.16
+    },
+    {
+      "fecha": "2026-04-27 22:06",
+      "valor": 10304.56
+    },
+    {
+      "fecha": "2026-04-27 22:07",
+      "valor": 10311.94
+    },
+    {
+      "fecha": "2026-04-27 22:08",
+      "valor": 10535.98
     }
   ],
-  "dividendos_recibidos": 4.6735999999999995,
-  "comisiones_pagadas": 19.5476,
+  "dividendos_recibidos": 7.774,
+  "comisiones_pagadas": 23.504099999999998,
   "capital_inicial": 1368.2699999999995
 }
