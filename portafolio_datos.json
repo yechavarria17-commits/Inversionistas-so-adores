@@ -1,8 +1,8 @@
 {
-  "capital": 3309.3294999999994,
+  "capital": 2902.2359999999994,
   "acciones": {
     "NVDA": {
-      "cantidad": 6,
+      "cantidad": 5,
       "precio_promedio": 201.68
     },
     "TSLA": {
@@ -28,6 +28,10 @@
     "META": {
       "cantidad": 1,
       "precio_promedio": 678.62
+    },
+    "V": {
+      "cantidad": 2,
+      "precio_promedio": 309.3
     }
   },
   "cdts": [
@@ -182,6 +186,27 @@
       "total": 1501.0718,
       "fecha": "2026-04-28 16:58",
       "capital_restante": 3309.33
+    },
+    {
+      "tipo": "COMPRA",
+      "ticker": "V",
+      "cantidad": 2,
+      "precio": 309.3,
+      "comision": 1.2372,
+      "total": 619.8372,
+      "fecha": "2026-04-28 18:56",
+      "capital_restante": 2689.49
+    },
+    {
+      "tipo": "VENTA",
+      "ticker": "NVDA",
+      "cantidad": 1,
+      "precio": 213.17,
+      "ganancia": 11.0637,
+      "comision": 0.4263,
+      "total": 212.7437,
+      "fecha": "2026-04-28 18:58",
+      "capital_restante": 2902.24
     }
   ],
   "historial_valor": [
@@ -260,9 +285,17 @@
     {
       "fecha": "2026-04-28 16:58",
       "valor": 10477.69
+    },
+    {
+      "fecha": "2026-04-28 18:56",
+      "valor": 10476.46
+    },
+    {
+      "fecha": "2026-04-28 18:58",
+      "valor": 10476.03
     }
   ],
   "dividendos_recibidos": 7.774,
-  "comisiones_pagadas": 26.512299999999996,
+  "comisiones_pagadas": 28.1758,
   "capital_inicial": 1368.2699999999995
 }
